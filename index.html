@@ -133,7 +133,8 @@
     .check-item:last-child{border:0}
     .check-item input[type="checkbox"]{appearance:none;width:22px;height:22px;border:1.5px solid #9a9c96;border-radius:7px;flex:none;margin:0}
     .check-item input[type="checkbox"]:checked{background:var(--dark);border-color:var(--dark);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m5 12 4 4L19 6'/%3E%3C/svg%3E");background-size:15px;background-position:center;background-repeat:no-repeat}
-    .check-item input[type="checkbox"]:checked+.check-label-input{text-decoration:line-through;color:var(--muted)}
+    .check-item input[type="checkbox"]:checked+.check-label-text{text-decoration:line-through;color:var(--muted)}
+    .check-label-text{width:100%;padding:2px 0;color:var(--text);line-height:1.45}
     .check-item span{font-size:14px;line-height:1.5}
     .currency-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}
     .rate-big{font-size:38px;font-weight:780;letter-spacing:-.055em;margin:12px 0 4px}
@@ -155,6 +156,7 @@
     .badge{display:inline-block;border-radius:999px;background:#eee5dc;color:#765437;padding:4px 8px;font-size:11px;font-weight:700}
     .budget-total{margin-top:14px;padding:14px;border-radius:16px;background:var(--surface2)}
     .budget-total b{display:block;font-size:19px;margin-top:5px}
+    .budget-trip-picker{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:15px}.budget-trip-picker label{font-size:13px;font-weight:750}.budget-trip-picker select{min-width:min(360px,100%);border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}.budget-page-summary{margin:0 0 15px}
     .timeline{position:relative;margin-left:7px;padding-left:24px;border-left:1px solid #bbbdb7}
     .timeline-item{position:relative;margin:0 0 22px}
     .timeline-item:before{content:"";position:absolute;left:-30px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--dark);border:3px solid var(--bg)}
@@ -187,6 +189,7 @@
       .hero{padding:26px 21px}.card{padding:17px}
       .guide-grid,.guide-grid.two,.guide-steps{grid-template-columns:1fr}.guide-banner{align-items:stretch;flex-direction:column}.guide-banner-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;width:100%}.guide-banner-actions .primary-btn{width:auto}
       .feedback-head{display:block}.feedback-guide-link{margin-top:8px}.feedback-previews{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .budget-trip-picker{align-items:stretch;flex-direction:column}.budget-trip-picker select{width:100%}
       .home-nearest{padding:20px}.home-ready{grid-template-columns:1fr}.home-nearest-head{align-items:center}.home-other-trips{grid-auto-columns:82%}
       .home-editing .home-layout-section{padding:10px}.home-edit-controls{flex-wrap:wrap}.home-edit-controls .home-fixed-badge{margin-left:auto}
       .stay-member-row{grid-template-columns:1fr 1fr}.stay-member-row>strong{grid-column:1/-1}.stay-panel-head{align-items:flex-start}
@@ -406,6 +409,7 @@
 
     <section class="page" id="page-budget">
       <div class="section-title" style="margin-top:3px"><h2>여행비 정산</h2><p>금액은 이 기기에 자동 저장</p></div>
+      <article class="card budget-trip-picker"><label for="budget-trip-select">정산할 여행</label><select id="budget-trip-select" aria-label="정산할 여행 선택"></select></article>
       <div class="grid" id="budget-cards"></div>
     </section>
 
@@ -767,13 +771,13 @@ function renderChecklist(type,target){
  el.dataset.checklist=type;
  const saved=getSaved(type),groups=getChecklistDefinition(type);
  el.innerHTML=`<div class="check-toolbar"><div class="check-status"><div><b><span data-checked="${type}">0</span> / <span data-total="${type}">0</span>개 준비 완료</b><div class="bar" style="background:#deded7;margin-top:8px"><span data-progress="${type}" style="background:#171a17"></span></div></div><div class="check-group-tools"><button data-reset="${type}">전체 해제</button><button data-restore="${type}">기본 목록</button><button class="packing-home-btn" data-packing-home="${type}">저장하고 홈으로</button></div></div></div>`+
- groups.map((group,gi)=>`<section class="check-group"><div class="check-group-head"><span>${escapeHTML(group.label)}</span><div class="check-group-tools"><span data-count="${type}-${gi}"></span><button class="check-edit-btn" data-add-check="${gi}">+ 추가</button></div></div>${group.items.map(item=>`<div class="check-item"><label><input type="checkbox" aria-label="${escapeHTML(item.label)}" data-check="${type}" data-group="${gi}" data-id="${escapeHTML(item.id)}" ${saved[item.id]?"checked":""}><input class="check-label-input" aria-label="준비물 이름" data-label-check="${escapeHTML(item.id)}" data-group-index="${gi}" maxlength="80" value="${escapeHTML(item.label)}"></label><div class="check-item-actions"><button data-delete-check="${escapeHTML(item.id)}" data-group-index="${gi}">삭제</button></div></div>`).join("")}</section>`).join("");
+ groups.map((group,gi)=>`<section class="check-group"><div class="check-group-head"><span>${escapeHTML(group.label)}</span><div class="check-group-tools"><span data-count="${type}-${gi}"></span><button class="check-edit-btn" data-add-check="${gi}">+ 추가</button></div></div>${group.items.map(item=>`<div class="check-item"><label><input type="checkbox" aria-label="${escapeHTML(item.label)}" data-check="${type}" data-group="${gi}" data-id="${escapeHTML(item.id)}" ${saved[item.id]?"checked":""}><span class="check-label-text">${escapeHTML(item.label)}</span></label><div class="check-item-actions"><button data-edit-check="${escapeHTML(item.id)}" data-group-index="${gi}">수정</button><button data-delete-check="${escapeHTML(item.id)}" data-group-index="${gi}">삭제</button></div></div>`).join("")}</section>`).join("");
  el.querySelectorAll(`[data-check="${type}"]`).forEach(i=>i.addEventListener("change",()=>{const s=getSaved(type);s[i.dataset.id]=i.checked;writeJSON(storageKey(type),s);syncChecklist(type);const stats=packingStats(type),trip=findTrip(type),eventName=i.checked?"packing_item_checked":"packing_item_unchecked";trackEvent(eventName,tripAnalytics(trip,{feature:i.dataset.id,completion_percent:stats.pct}));trackEvent("readiness_updated",tripAnalytics(trip,{feature:"packing",completion_percent:readinessSummary(type).pct}));if(stats.pct===100)trackEvent("packing_completed",tripAnalytics(trip,{completion_percent:stats.pct}));scheduleCloudSave()}));
  el.querySelector(`[data-reset="${type}"]`).onclick=()=>{if(confirm("모든 체크를 해제할까요?")){removeStored(storageKey(type));syncChecklist(type);trackEvent("packing_reset",tripAnalytics(findTrip(type),{completion_percent:0}));scheduleCloudSave()}};
  el.querySelector(`[data-restore="${type}"]`).onclick=()=>{if(confirm("추가·변경한 항목을 지우고 기본 준비물 목록으로 되돌릴까요?")){removeStored(checklistDefinitionKey(type));rerenderChecklist(type);scheduleCloudSave()}};
  el.querySelector(`[data-packing-home="${type}"]`).onclick=()=>{renderDashboard();scheduleCloudSave();go("home")};
- el.querySelectorAll("[data-add-check]").forEach(button=>button.onclick=()=>{const next=getChecklistDefinition(type),id=`${type}-custom-${crypto.randomUUID()}`;next[Number(button.dataset.addCheck)].items.push({id,label:"새 준비물"});saveChecklistDefinition(type,next);document.querySelectorAll(`[data-label-check="${id}"]`).forEach(input=>{input.focus();input.select()})});
- el.querySelectorAll("[data-label-check]").forEach(input=>{input.oninput=()=>{const label=input.value.slice(0,80),next=getChecklistDefinition(type),group=next[Number(input.dataset.groupIndex)],item=group.items.find(value=>value.id===input.dataset.labelCheck);if(!item)return;item.label=label;writeJSON(checklistDefinitionKey(type),next);input.parentElement.querySelector('[data-check]')?.setAttribute("aria-label",label||"새 준비물");scheduleCloudSave()};input.onblur=()=>{if(!input.value.trim()){input.value="새 준비물";input.oninput()}}});
+ el.querySelectorAll("[data-add-check]").forEach(button=>button.onclick=()=>{const next=getChecklistDefinition(type),id=`${type}-custom-${crypto.randomUUID()}`;next[Number(button.dataset.addCheck)].items.push({id,label:"새 준비물"});saveChecklistDefinition(type,next);document.querySelector(`[data-edit-check="${id}"]`)?.focus()});
+ el.querySelectorAll("[data-edit-check]").forEach(button=>button.onclick=()=>{const next=getChecklistDefinition(type),group=next[Number(button.dataset.groupIndex)],item=group?.items.find(value=>value.id===button.dataset.editCheck);if(!item)return;const label=prompt("준비물 이름을 입력해 주세요.",item.label);if(label===null)return;item.label=label.trim().slice(0,80)||"새 준비물";saveChecklistDefinition(type,next)});
  el.querySelectorAll("[data-delete-check]").forEach(button=>button.onclick=()=>{if(!confirm("이 준비물을 목록에서 삭제할까요?"))return;const next=getChecklistDefinition(type),group=next[Number(button.dataset.groupIndex)];group.items=group.items.filter(item=>item.id!==button.dataset.deleteCheck);saveChecklistDefinition(type,next)});
  updateProgress(type);
 }
@@ -858,7 +862,7 @@ let festivalWorldMap=null;function renderWorldMap(){const trips=allTrips(),list=
 
 function go(page,updateHistory=true){
  if(["fuji","sonic"].includes(page))return openTripDetail(page,"overview",updateHistory);
- restoreLegacyTripPanels();if(page==="mypage")renderMyPage();showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}if(page==="guide")trackEvent("guide_view",{section:"guide"});if(page==="feedback")prepareFeedbackPage();const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${page}`);
+ restoreLegacyTripPanels();if(page==="mypage")renderMyPage();if(page==="budget")renderBudget();showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}if(page==="guide")trackEvent("guide_view",{section:"guide"});if(page==="feedback")prepareFeedbackPage();const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${page}`);
 }
 document.querySelectorAll("[data-go]:not(.nav-btn)").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 function routeHash(){const route=decodeURIComponent(location.hash.replace(/^#/,""));if(route.startsWith("trip/")){const [,id,tab="overview"]=route.split("/");return openTripDetail(id,tab,false,"history")}if(["fuji","sonic"].includes(route))return findTrip(route)?openTripDetail(route,"overview",false,"legacy_route"):go("trips",false);if(["home","trips","packing","currency","worldmap","budget","mypage","guide","feedback"].includes(route))go(route,false);else go("home",false)}
@@ -947,23 +951,27 @@ const BUDGETS={
   {id:"rental",label:"렌터카",currency:"KRW",value:0},{id:"parking",label:"주차",currency:"JPY",value:0},
   {id:"fuel",label:"주유",currency:"KRW",value:0},{id:"toll",label:"톨비",currency:"KRW",value:0}]}
 };
+const BUDGET_SELECTED_TRIP_KEY="festival-passport-budget-selected-trip-v1",BUDGET_CURRENCIES=["KRW","JPY","USD","HKD","GBP","EUR","CNY","TWD","SGD","AUD","CAD","THB","VND"];
 function getBudget(){if(isGuestAccess())return{};const saved=readJSON(BUDGET_KEY,{});return saved&&typeof saved==="object"?saved:{}}
-function renderBudget(){
- const saved=getBudget(),root=document.getElementById("budget-cards");
- root.innerHTML=Object.entries(BUDGETS).map(([type,trip])=>`<article class="card"><h2>${trip.title}</h2><table class="budget-table"><tbody>${trip.items.map(item=>{
+function budgetTrips(){return allTrips().filter(trip=>trip.enabledFeatures?.budget!==false)}
+function selectedBudgetTrip(){const trips=budgetTrips(),saved=readJSON(BUDGET_SELECTED_TRIP_KEY,""),current=readJSON(CURRENT_TRIP_KEY,"");return trips.find(trip=>trip.id===saved)||trips.find(trip=>trip.id===current)||trips[0]||null}
+function renderLegacyBudget(root){const saved=getBudget();root.innerHTML=Object.entries(BUDGETS).map(([type,trip])=>`<article class="card"><h2>${trip.title}</h2><table class="budget-table"><tbody>${trip.items.map(item=>{
   const key=`${type}-${item.id}`,value=isGuestAccess()?0:Object.prototype.hasOwnProperty.call(saved,key)?saved[key]:item.value;
   const isPending=value===null;
   return `<tr><th scope="row"><label for="budget-${key}">${item.label}</label></th><td><input class="budget-input" id="budget-${key}" data-budget="${key}" data-currency="${item.currency}" inputmode="numeric" value="${isPending?"":Number(value).toLocaleString()}" placeholder="미정" aria-label="${trip.title} ${item.label} ${item.currency==='KRW'?'원':'엔'}">${isPending?`<span class="badge">미정</span>`:""}</td><td>${item.currency==="KRW"?"원":"엔"}</td></tr>`}).join("")}</tbody></table><div class="budget-total"><small>합계</small><b id="budget-total-${type}"></b><small id="budget-converted-${type}"></small></div></article>`).join("");
  root.querySelectorAll("[data-budget]").forEach(input=>{input.addEventListener("input",()=>{const data=getBudget(),raw=input.value.replace(/,/g,"").trim();data[input.dataset.budget]=raw===""?null:(Number.isFinite(Number(raw))&&Number(raw)>=0?Number(raw):0);if(!isGuestAccess())writeJSON(BUDGET_KEY,data);const badge=input.parentElement.querySelector(".badge");if(badge)badge.classList.toggle("hidden",raw!=="");updateBudgetTotals();if(!isGuestAccess())scheduleCloudSave()});input.addEventListener("change",()=>trackEvent("budget_updated",{trip_id:input.dataset.budget.split("-")[0],section:"budget",feature:input.dataset.budget}))});
  updateBudgetTotals();
 }
+function budgetTotals(items){const totals={};items.forEach(item=>{const value=Number(item.amount||0),currency=item.currency||"KRW";if(Number.isFinite(value))totals[currency]=(totals[currency]||0)+value});return Object.entries(totals).filter(([,value])=>value>0).map(([currency,value])=>`${value.toLocaleString()} ${currency}`).join(" + ")||"등록 전"}
+function renderTripBudgetPage(root,trip){const items=isGuestAccess()?[]:tripBudget(trip.id);root.innerHTML=`<div class="trip-summary-grid budget-page-summary"><article class="card"><span class="sub">등록 항목</span><b>${items.length}개</b></article><article class="card"><span class="sub">예상 합계</span><b style="font-size:16px">${budgetTotals(items)}</b></article><article class="card"><span class="sub">여행</span><b style="font-size:15px">${escapeHTML(trip.title)}</b></article></div><article class="card"><h2>여행 예산</h2><form class="trip-form-section" id="page-trip-budget-form"><label>분류<select name="category"><option>티켓</option><option>교통</option><option>숙소</option><option>식비</option><option>기타</option></select></label><label>항목<input name="title" required maxlength="80"></label><label>금액<input name="amount" type="number" min="0" required></label><label>통화<select name="currency">${BUDGET_CURRENCIES.map(code=>`<option value="${code}" ${code===(trip.currency||"KRW")?"selected":""}>${code}</option>`).join("")}</select></label><div class="wide"><button class="primary-btn" ${isGuestAccess()?"disabled":""}>저장</button></div></form><div id="page-trip-budget-list">${items.length?items.map(item=>`<div class="itinerary-item"><h3>${escapeHTML(item.category)} · ${escapeHTML(item.title)}</h3><p>${Number(item.amount).toLocaleString()} ${escapeHTML(item.currency)}</p><button class="secondary-btn" data-page-delete-trip-budget="${item.id}" ${isGuestAccess()?"disabled":""}>삭제</button></div>`).join(""):'<div class="trip-empty">아직 등록한 예산이 없습니다.</div>'}</div></article>`;document.getElementById("page-trip-budget-form").onsubmit=event=>{event.preventDefault();if(isGuestAccess())return;const item=Object.fromEntries(new FormData(event.currentTarget).entries());item.id=crypto.randomUUID();writeJSON(tripBudgetKey(trip.id),[...tripBudget(trip.id),item]);trackEvent("budget_item_added",tripAnalytics(trip,{feature:item.category,source:"budget_page"}));renderBudget();scheduleCloudSave()};root.querySelectorAll("[data-page-delete-trip-budget]").forEach(button=>button.onclick=()=>{writeJSON(tripBudgetKey(trip.id),tripBudget(trip.id).filter(item=>item.id!==button.dataset.pageDeleteTripBudget));trackEvent("budget_item_deleted",tripAnalytics(trip,{section:"budget",source:"budget_page"}));renderBudget();scheduleCloudSave()})}
+function renderBudget(){const root=document.getElementById("budget-cards"),select=document.getElementById("budget-trip-select"),trips=budgetTrips(),trip=selectedBudgetTrip();select.innerHTML=trips.map(item=>`<option value="${escapeHTML(item.id)}" ${item.id===trip?.id?"selected":""}>${escapeHTML(item.title)}</option>`).join("");select.disabled=!trip;select.onchange=()=>{writeJSON(BUDGET_SELECTED_TRIP_KEY,select.value);trackEvent("budget_updated",{trip_id:select.value,section:"budget",feature:"trip_selection"});renderBudget()};if(!trip){root.innerHTML='<article class="card empty">정산할 여행이 없습니다. 여행을 먼저 추가해 주세요.</article>';return}if(trip.id==="fuji")renderLegacyBudget(root);else renderTripBudgetPage(root,trip)}
+renderBudget();
 function updateBudgetTotals(){
- const jpyRate=selectedCurrency()==="JPY"?rate:Number(rateCache().JPY?.rate);Object.entries(BUDGETS).forEach(([type,trip])=>{let krw=0,jpy=0;trip.items.forEach(item=>{const input=document.querySelector(`[data-budget="${type}-${item.id}"]`),raw=input?input.value.replace(/,/g,"").trim():"";if(raw==="")return;const value=Number(raw);if(!Number.isFinite(value)||value<0)return;if(item.currency==="KRW")krw+=value;else jpy+=value});
-  document.getElementById(`budget-total-${type}`).textContent=`${krw.toLocaleString()}원 + ${jpy.toLocaleString()}엔`;
-  document.getElementById(`budget-converted-${type}`).textContent=Number.isFinite(jpyRate)?`현재 환율 기준 약 ${Math.round(krw+jpy*jpyRate).toLocaleString()}원`:"JPY 환율 조회 후 예상 원화 합계를 표시합니다";
+ const jpyRate=selectedCurrency()==="JPY"?rate:Number(rateCache().JPY?.rate);Object.entries(BUDGETS).forEach(([type,trip])=>{const total=document.getElementById(`budget-total-${type}`),converted=document.getElementById(`budget-converted-${type}`);if(!total||!converted)return;let krw=0,jpy=0;trip.items.forEach(item=>{const input=document.querySelector(`[data-budget="${type}-${item.id}"]`),raw=input?input.value.replace(/,/g,"").trim():"";if(raw==="")return;const value=Number(raw);if(!Number.isFinite(value)||value<0)return;if(item.currency==="KRW")krw+=value;else jpy+=value});
+  total.textContent=`${krw.toLocaleString()}원 + ${jpy.toLocaleString()}엔`;
+  converted.textContent=Number.isFinite(jpyRate)?`현재 환율 기준 약 ${Math.round(krw+jpy*jpyRate).toLocaleString()}원`:"JPY 환율 조회 후 예상 원화 합계를 표시합니다";
  });
 }
-renderBudget();
 
 const CLOUD_TABLE="travel_companion_data";
 const cloudConfig=window.TRAVEL_CONFIG||{};
