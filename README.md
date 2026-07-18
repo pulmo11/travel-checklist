@@ -1,5 +1,31 @@
 # Festival Passport
 
+## 피드백 기능 설정
+
+- Supabase Dashboard의 **SQL Editor**에서 `SUPABASE_FEEDBACK.sql`을 한 번 실행합니다.
+- 이 스크립트는 INSERT 전용 `feedback` 테이블과 비공개 `feedback-images` Storage 버킷을 생성합니다.
+- 기존 `config.js`의 `supabaseUrl`과 `supabasePublishableKey`만 재사용하며 새 환경변수나 서비스 롤 키는 필요하지 않습니다.
+- 일반 사용자는 새 피드백과 이미지를 제출할 수만 있습니다. 목록 조회·수정·삭제와 비공개 이미지 다운로드는 허용되지 않으며, 관리자는 Supabase Dashboard에서 확인합니다.
+
+### 새 피드백 이메일 알림
+
+피드백 저장과 이메일 알림은 `supabase/functions/notify-feedback` Edge Function에서 함께 처리합니다. 알림 주소는 공개 코드에 넣지 않고 Supabase secret으로 설정합니다.
+
+1. [Resend](https://resend.com/)에 `illuvision@naver.com`으로 가입하고 API Key를 발급합니다.
+2. Supabase CLI에서 프로젝트를 연결한 뒤 아래 secret을 설정합니다.
+
+```sh
+supabase secrets set RESEND_API_KEY=re_발급받은키 FEEDBACK_NOTIFICATION_EMAIL=illuvision@naver.com
+```
+
+3. 익명 사용자도 문의를 보낼 수 있도록 Edge Function을 배포합니다.
+
+```sh
+supabase functions deploy notify-feedback --no-verify-jwt
+```
+
+Resend의 기본 발신 주소 `onboarding@resend.dev`를 사용합니다. Resend 계정 이메일과 알림 수신 주소가 다르거나 자체 발신 주소를 사용하려면 Resend에서 도메인 인증이 필요합니다.
+
 ## Trip Engine Phase A
 
 - 모든 기본·사용자 추가 여행은 `#trip/{tripId}` 공통 상세 화면을 사용합니다.
