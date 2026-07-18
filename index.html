@@ -1,0 +1,947 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#151815">
+  <meta name="description" content="페스티벌 여행 준비를 한곳에서 관리하는 Festival Passport">
+  <title>Festival Passport</title>
+  <script>
+    (()=>{const enabled=location.hostname==="pulmo11.github.io"&&location.pathname.startsWith("/travel-checklist"),debug=!enabled&&new URLSearchParams(location.search).get("ga_debug")==="1";window.FESTIVAL_ANALYTICS={enabled,debug,measurementId:"G-WZKSYQ9EP9"};if(!enabled)return;window.dataLayer=window.dataLayer||[];window.gtag=function(){window.dataLayer.push(arguments)};const script=document.createElement("script");script.async=true;script.src="https://www.googletagmanager.com/gtag/js?id=G-WZKSYQ9EP9";document.head.appendChild(script);window.gtag("js",new Date());window.gtag("config","G-WZKSYQ9EP9",{send_page_view:false,allow_google_signals:false})})();
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="./festival-records.css?v=2">
+  <!-- build: 2026-07-15 rate-api-v2 -->
+  <style>
+    :root{
+      --bg:#f4f3ee;--surface:#fff;--surface2:#ecebe5;--text:#171917;--muted:#6d706a;
+      --line:#deded7;--dark:#171a17;--green:#427257;--orange:#cf623d;--blue:#446f9a;
+      --radius:22px;--shadow:0 12px 34px rgba(27,29,25,.08);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Apple SD Gothic Neo",sans-serif}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    a{color:inherit}
+    .app{min-height:100dvh;padding-bottom:92px}
+    .topbar{position:sticky;top:0;z-index:30;background:rgba(244,243,238,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.04)}
+    .topbar-inner{max-width:1180px;margin:auto;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+    .brand{border:0;background:none;padding:0;text-align:left}
+    .brand strong{display:block;font-size:17px;letter-spacing:-.03em}
+    .brand span{font-size:11px;color:var(--muted);letter-spacing:.12em}
+    .sync{font-size:12px;color:var(--muted);white-space:nowrap}
+    .sync-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 11px;font-size:12px;color:var(--text)}
+    .auth-row{display:flex;gap:8px;margin-top:14px}.auth-row input{min-width:0;flex:1;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
+    .choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}
+    .choice-card{border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:18px;text-align:left}.choice-card b{display:block;font-size:16px}.choice-card span{display:block;margin-top:7px;color:var(--muted);font-size:12px;line-height:1.5}
+    .planner-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:15px}.planner-form .wide{grid-column:1/-1}.planner-form label{font-size:12px;color:var(--muted)}.planner-form input,.planner-form select{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}.planner-actions{display:flex;gap:8px;align-items:end}
+    .itinerary-item{padding:14px 0;border-top:1px solid var(--line)}.itinerary-item:first-child{border-top:0}.itinerary-item h3{font-size:15px}.itinerary-item p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    .personal-ticket{padding:18px 0}.personal-ticket-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.personal-ticket-head span{font-size:11px;color:var(--muted)}.personal-ticket .flight{margin-top:12px}
+    .group-code{padding:14px;border-radius:15px;background:var(--surface2);font-size:22px;font-weight:750;letter-spacing:.08em;text-align:center;margin-top:12px;user-select:all}
+    .status-note{min-height:18px;margin-top:9px;color:var(--muted);font-size:12px}
+    main{max-width:1180px;margin:auto;padding:26px 16px 54px}
+    .page{display:none;animation:fade .22s ease}
+    .page.active{display:block}
+    @keyframes fade{from{opacity:.3;transform:translateY(5px)}}
+    .hero{border-radius:30px;background:var(--dark);color:#fff;padding:30px 25px;box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;position:relative}
+    .hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-90px;top:-90px;background:rgba(255,255,255,.08)}
+    .hero-kicker{font-size:12px;letter-spacing:.12em;color:#c8cec6;margin:0 0 10px}
+    .hero h1{font-size:clamp(31px,7vw,52px);line-height:1.05;margin:0;letter-spacing:-.055em}
+    .hero p{max-width:620px;margin:16px 0 0;color:#d4d8d2;font-size:14px}
+    .primary-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:10px 13px;background:var(--dark);color:#fff;text-decoration:none;font-weight:700}
+    .action-list{display:grid;margin-top:10px}.action-item{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:transparent;padding:12px 0;text-align:left;color:var(--text)}.action-item:first-child{border-top:0}.action-item .action-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:var(--surface2)}.action-item small{color:var(--muted)}
+    .readiness-head{display:flex;align-items:end;justify-content:space-between;gap:12px}.readiness-score{font-size:34px;font-weight:780;letter-spacing:-.05em}.readiness-list{display:grid;margin-top:12px}.readiness-row{display:grid;grid-template-columns:1fr minmax(115px,auto);align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}.readiness-row:first-child{border-top:0}.readiness-row b{font-size:13px}.readiness-row select{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff;font-size:12px}.readiness-status{font-size:12px;color:var(--muted);text-align:right}.readiness-status strong{display:block;color:var(--text);font-size:12px}.readiness-status small{display:block;margin-top:2px}.packing-home-btn{border:0;background:var(--dark)!important;color:#fff;border-radius:10px;padding:8px 10px;font-size:12px}
+    .sync-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px}.sync-summary .sub{margin-top:3px}.sync-panel{width:min(560px,calc(100% - 24px));border:0;border-radius:24px;padding:0;background:var(--surface);color:var(--text);box-shadow:0 24px 70px rgba(0,0,0,.25)}.sync-panel::backdrop{background:rgba(18,20,18,.5);backdrop-filter:blur(4px)}.sync-panel-inner{padding:22px}.sync-panel-head{display:flex;align-items:start;justify-content:space-between;gap:12px}.icon-btn{width:36px;height:36px;border:1px solid var(--line);border-radius:50%;background:#fff}.sync-details{display:grid;gap:9px;margin-top:16px;padding:14px;border-radius:16px;background:var(--surface2);font-size:12px}.sync-detail{display:flex;justify-content:space-between;gap:15px}.sync-detail span{color:var(--muted)}
+    .exchange-off{padding:26px;text-align:center}.exchange-off .mark{width:52px;height:52px;display:grid;place-items:center;margin:0 auto 12px;border-radius:17px;background:var(--surface2);font-size:23px}.exchange-content[aria-hidden="true"]{display:none}.trip-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.14);font-size:11px;font-weight:700}
+    .add-trip-card{min-height:210px;display:grid;place-items:center;text-align:center;border:1px dashed #aeb0aa;background:transparent;box-shadow:none}.add-trip-card span{display:grid;place-items:center;width:44px;height:44px;margin:0 auto 12px;border-radius:50%;background:var(--surface);font-size:24px}.trip-form-dialog{width:min(620px,calc(100% - 24px));border:0;border-radius:24px;padding:0;background:var(--surface);box-shadow:0 24px 70px rgba(0,0,0,.25)}.trip-form-dialog::backdrop{background:rgba(18,20,18,.5);backdrop-filter:blur(4px)}.trip-form-inner{padding:22px}.trip-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.trip-form-grid label{font-size:12px;color:var(--muted)}.trip-form-grid input,.trip-form-grid select{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}.trip-form-grid .wide{grid-column:1/-1}.custom-trip-actions{display:flex;justify-content:flex-end;margin-top:10px}.custom-trip-actions button{border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:9px;padding:7px 9px;font-size:11px}
+    .wizard-progress{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:18px}.wizard-progress span{height:5px;border-radius:99px;background:var(--line)}.wizard-progress span.active{background:var(--dark)}.wizard-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted);font-size:12px}.wizard-step{display:none}.wizard-step.active{display:grid}.wizard-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.wizard-choice label{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid var(--line);border-radius:12px;color:var(--text);background:#fff}.wizard-choice input{width:auto;margin:0}.wizard-summary{display:grid;gap:8px;padding:15px;border-radius:16px;background:var(--surface2)}.wizard-summary div{display:flex;justify-content:space-between;gap:12px;font-size:13px}.wizard-summary span{color:var(--muted)}
+    .grid{display:grid;gap:15px}
+    .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:0 7px 24px rgba(30,33,28,.04)}
+    .card h2,.card h3{margin:0;letter-spacing:-.035em}
+    .card h2{font-size:22px}.card h3{font-size:17px}
+    .sub{color:var(--muted);font-size:13px;margin:7px 0 0}
+    .event-card{min-height:210px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .event-card.fuji{background:#1e3126;color:#fff;border:0}
+    .event-card.sonic{background:#20344a;color:#fff;border:0}
+    .event-card.sonic.coming-soon{opacity:.58;filter:saturate(.55)}
+    .coming-badge{display:inline-flex;margin-top:10px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.14);font-size:11px;font-weight:700}
+    .event-card .sub{color:rgba(255,255,255,.72)}
+    .event-icon{font-size:30px;margin-bottom:20px}
+    .event-meta{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+    .dday{font-size:26px;font-weight:760;letter-spacing:-.04em}
+    .progress-mini{font-size:12px;color:rgba(255,255,255,.75);text-align:right}
+    .bar{height:7px;background:rgba(255,255,255,.18);border-radius:99px;margin-top:7px;overflow:hidden}
+    .bar>span{display:block;height:100%;background:#fff;border-radius:inherit;width:0}
+    .section-title{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:30px 3px 13px}
+    .section-title h2{font-size:24px;margin:0;letter-spacing:-.045em}
+    .section-title p{margin:0;color:var(--muted);font-size:12px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .home-edit-bar{display:flex;justify-content:flex-end;margin:-7px 2px 3px}.home-edit-bar button{min-width:76px;min-height:44px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--text);font-weight:700}.home-layout-section{position:relative}.home-layout-section.home-layout-hidden{display:none}.home-editing .home-layout-section{margin-top:12px;padding:12px;border:1px solid var(--accent);border-radius:22px;background:rgba(0,122,255,.025)}.home-editing .home-layout-section .section-title{margin-top:14px}.home-edit-controls{display:none;align-items:center;gap:6px;min-width:0}.home-editing .home-edit-controls{display:flex}.home-edit-control{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--text);font-weight:750}.home-drag-handle{cursor:grab;touch-action:none;font-size:19px}.home-drag-handle:active{cursor:grabbing}.home-fixed-badge{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;border-radius:999px;background:var(--surface2);color:var(--muted);font-size:11px;font-weight:700}.home-layout-section.home-dragging{opacity:.55}.home-layout-section.home-drop-target{border-color:var(--dark);background:var(--surface2)}.home-edit-panel{margin-top:16px;padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface)}.home-edit-panel h3{margin:0 0 10px;font-size:15px}.home-hidden-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.home-restore-btn{min-height:44px;border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 13px;color:var(--text);font-weight:700}.home-edit-panel>.secondary-btn{min-height:44px}.home-edit-empty{margin:0 0 14px;color:var(--muted);font-size:12px}
+    .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.quick-grid[data-visible-count="1"]{grid-template-columns:1fr}.quick-grid[data-visible-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}.quick-grid[data-visible-count="4"]{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .quick{border:1px solid var(--line);background:var(--surface);border-radius:18px;padding:16px;text-align:left;min-height:100px}
+    .quick .app-icon{display:block;width:22px;height:22px;margin-bottom:16px}.quick b{font-size:14px}
+    .home-quick-item{min-width:0}.home-quick-item>.quick{width:100%;height:100%}.home-quick-item.home-tool-hidden{display:none}.home-tool-controls{display:none;grid-template-columns:repeat(3,44px);gap:6px;margin-bottom:7px}.home-editing #home-quick-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.home-editing .home-quick-item:not(.home-tool-hidden){padding:8px;border:1px dashed var(--accent);border-radius:18px;background:rgba(0,122,255,.025)}.home-editing .home-tool-controls{display:grid}.home-editing .home-quick-item>.quick{pointer-events:none}.home-tool-control{width:44px;height:44px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--text);font-weight:750}.home-tool-delete{font-size:11px}.home-hidden-tools{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}
+    .stay-panel-head,.stay-card-head,.stay-card-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.stay-type-choice{display:flex;gap:9px;flex-wrap:nowrap}.stay-type-choice label{display:flex;align-items:center;gap:8px;min-height:44px;padding:9px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;white-space:nowrap}.trip-form-section .stay-type-choice input{width:auto;margin:0}.stay-member-editor{display:grid;gap:9px;margin-top:10px}.stay-member-row{display:grid;grid-template-columns:minmax(100px,1fr) repeat(2,minmax(130px,1fr)) minmax(90px,.7fr) minmax(110px,.8fr);gap:8px;align-items:end;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}.stay-member-name{align-self:center;display:grid;gap:7px}.stay-member-name button{width:max-content;border:0;background:none;color:var(--muted);padding:0;font-size:11px;text-decoration:underline}.stay-badge{display:inline-flex;align-items:center;min-height:26px;padding:3px 9px;border-radius:999px;background:var(--surface2);font-size:11px;font-weight:800}.stay-badge.group{background:#e8f1eb;color:#2c6544}.stay-form-error{margin-top:10px;color:#b42318;font-size:13px;font-weight:700}.stay-details{margin-top:12px}.stay-details summary,.stay-additional summary{cursor:pointer;font-weight:750}.stay-details dl{margin-top:10px}.stay-card{margin-top:12px}.stay-card h3{margin:4px 0}.stay-card-meta{line-height:1.7}.stay-additional{margin-top:12px}.group-stay-timeline{position:relative;display:grid;gap:9px;min-width:0;margin:17px 0 0 7px;padding-left:22px;border-left:1px solid var(--line)}.group-stay-timeline .flight-timeline-item{min-width:0;margin:0;padding:11px 12px 17px;border-radius:13px;background:var(--surface2)}.group-stay-timeline .flight-timeline-item:before{left:-30px}.group-stay-timeline .flight-timeline-item.festival{margin:0 0 4px}
+    .festival-head{padding:25px;border-radius:28px;color:#fff;margin-bottom:16px}
+    .festival-head.fuji{background:linear-gradient(135deg,#203629,#49624f)}
+    .festival-head.sonic{background:linear-gradient(135deg,#20344a,#6b4b73)}
+    .festival-head .eyebrow{font-size:12px;opacity:.7;letter-spacing:.12em}
+    .festival-head h1{font-size:34px;margin:8px 0 12px;letter-spacing:-.05em}
+    .trip-detail-head .trip-head-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px}.trip-detail-head .trip-head-actions button{border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;border-radius:11px;padding:8px 11px}
+    .trip-form-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:15px}.trip-form-section .wide{grid-column:1/-1}.trip-form-section label{font-size:12px;color:var(--muted)}.trip-form-section input,.trip-form-section select{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}
+    .trip-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:15px}.trip-summary-grid .card{padding:16px}.trip-summary-grid b{display:block;margin-top:5px;font-size:20px}.trip-empty{padding:28px 14px;text-align:center;color:var(--muted)}
+    .map-card{margin-top:15px;overflow:hidden}.map-frame{display:block;width:100%;height:240px;border:0;border-radius:16px;background:var(--surface2)}.map-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.map-link{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 12px;text-decoration:none;font-size:12px}.map-link.primary{background:var(--dark);border-color:var(--dark);color:#fff}
+    .world-map{height:min(58vh,520px);min-height:360px;border-radius:18px;overflow:hidden;background:#dce5df;z-index:1}.world-map-list{display:grid;gap:10px;margin-top:14px}.world-trip{width:100%;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:12px;border:1px solid var(--line);border-radius:15px;background:#fff;padding:12px;text-align:left}.world-trip .world-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:var(--surface2);font-size:20px}.world-trip small{display:block;color:var(--muted);margin-top:3px}.world-trip .map-state{font-size:11px;color:var(--muted)}
+    .chips{display:flex;flex-wrap:wrap;gap:7px}
+    .chip{background:rgba(255,255,255,.14);padding:7px 10px;border-radius:999px;font-size:12px}
+    .tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 13px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:10px 14px;white-space:nowrap;font-size:13px}
+    .tab.active{background:var(--dark);color:#fff;border-color:var(--dark)}
+    .panel{display:none}.panel.active{display:block}
+    .info-list{display:grid;gap:10px;margin-top:14px}
+    .info-row{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line);font-size:14px}
+    .info-row:first-child{border-top:0}.info-row dt{color:var(--muted)}.info-row dd{margin:0;font-weight:600}
+    .flight{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:18px;padding:16px;border-radius:18px;background:var(--surface2)}
+    .airport b{font-size:24px}.airport small{display:block;color:var(--muted);margin-top:4px}
+    .arrow{text-align:center;color:var(--muted)}
+    .view-switch{display:inline-flex;gap:4px;padding:4px;background:var(--surface2);border-radius:13px;margin-top:16px}
+    .view-switch button{border:0;background:transparent;border-radius:10px;padding:8px 12px;font-size:12px;color:var(--muted)}
+    .view-switch button.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+    .traveler-list{display:flex;gap:7px;overflow-x:auto;padding:14px 0 3px;scrollbar-width:none}.traveler-list::-webkit-scrollbar{display:none}
+    .traveler-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 13px;white-space:nowrap;font-size:13px}
+    .traveler-btn.active{background:var(--dark);border-color:var(--dark);color:#fff}
+    .flight-view{display:none}.flight-view.active{display:block}
+    .flight-person-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px}.flight-person-head h3{font-size:18px}.flight-person-head span{font-size:12px;color:var(--muted)}
+    .flight-timeline{position:relative;margin:17px 0 0 7px;padding-left:22px;border-left:1px solid var(--line)}
+    .flight-timeline-item{position:relative;padding:0 0 20px}.flight-timeline-item:last-child{padding-bottom:2px}.flight-timeline-item:before{content:"";position:absolute;left:-28px;top:5px;width:9px;height:9px;border-radius:50%;background:var(--green);border:3px solid var(--surface)}
+    .flight-timeline-item time{font-size:12px;color:var(--muted)}.flight-timeline-item h3{font-size:15px;margin:4px 0}.flight-timeline-item p{font-size:13px;color:var(--muted);margin:0}
+    .flight-timeline-item.festival{margin:2px 0 20px;padding:14px 16px;border-radius:15px;background:rgba(98,139,99,.12)}.flight-timeline-item.festival:before{top:18px;background:#d9a441}.flight-timeline-item.festival h3{color:#456947}
+    .check-toolbar{position:sticky;top:62px;z-index:15;background:rgba(244,243,238,.92);backdrop-filter:blur(12px);padding:10px 0}
+    .check-status{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+    .check-status b{font-size:13px}.check-status button{border:0;background:var(--surface2);border-radius:10px;padding:8px 10px;font-size:12px}
+    .check-group{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin:12px 0}
+    .check-group-head{padding:12px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:700}
+    .check-group-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.check-edit-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 8px;font-size:11px;color:var(--muted)}
+    .check-item{display:flex;gap:10px;align-items:center;padding:11px 17px;border-bottom:1px solid #eeeDE8}
+    .check-item label{display:flex;gap:12px;align-items:flex-start;min-width:0;flex:1;cursor:pointer}
+    .check-label-input{width:100%;border:0;border-bottom:1px solid transparent;background:transparent;padding:2px 0;color:var(--text);outline:0}.check-label-input:focus{border-bottom-color:var(--dark)}
+    .check-item-actions{display:flex;gap:4px;flex:none}.check-item-actions button{border:0;background:transparent;padding:5px;color:var(--muted);font-size:11px}
+    .check-item:last-child{border:0}
+    .check-item input[type="checkbox"]{appearance:none;width:22px;height:22px;border:1.5px solid #9a9c96;border-radius:7px;flex:none;margin:0}
+    .check-item input[type="checkbox"]:checked{background:var(--dark);border-color:var(--dark);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='m5 12 4 4L19 6'/%3E%3C/svg%3E");background-size:15px;background-position:center;background-repeat:no-repeat}
+    .check-item input[type="checkbox"]:checked+.check-label-input{text-decoration:line-through;color:var(--muted)}
+    .check-item span{font-size:14px;line-height:1.5}
+    .currency-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:15px}
+    .rate-big{font-size:38px;font-weight:780;letter-spacing:-.055em;margin:12px 0 4px}
+    .rate-state{font-size:12px;color:var(--muted)}
+    .input-wrap{margin-top:16px}
+    .input-wrap label{display:block;font-size:12px;color:var(--muted);margin:0 0 7px}
+    .input-wrap select{display:block;width:100%;margin-top:7px;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;color:var(--text)}
+    .money-input{display:flex;align-items:center;border:1px solid var(--line);border-radius:14px;padding:0 13px;background:#fff}
+    .money-input input{width:100%;border:0;outline:0;padding:14px 0;background:transparent;font-size:18px;font-weight:650}
+    .money-input span{font-size:13px;color:var(--muted)}
+    .result{padding:16px;border-radius:16px;background:var(--surface2);margin-top:11px}
+    .result small{color:var(--muted)}.result b{display:block;font-size:23px;margin-top:4px}
+    .button-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+    .secondary-btn{border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 12px;color:var(--text)}
+    .budget-table{width:100%;border-collapse:collapse;margin-top:12px}
+    .budget-table th,.budget-table td{padding:10px 0;border-top:1px solid var(--line);text-align:left;font-size:13px;vertical-align:middle}
+    .budget-table th{color:var(--muted);font-weight:500;width:28%}
+    .budget-input{width:100%;min-width:90px;border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff;text-align:right}
+    .badge{display:inline-block;border-radius:999px;background:#eee5dc;color:#765437;padding:4px 8px;font-size:11px;font-weight:700}
+    .budget-total{margin-top:14px;padding:14px;border-radius:16px;background:var(--surface2)}
+    .budget-total b{display:block;font-size:19px;margin-top:5px}
+    .timeline{position:relative;margin-left:7px;padding-left:24px;border-left:1px solid #bbbdb7}
+    .timeline-item{position:relative;margin:0 0 22px}
+    .timeline-item:before{content:"";position:absolute;left:-30px;top:5px;width:11px;height:11px;border-radius:50%;background:var(--dark);border:3px solid var(--bg)}
+    .timeline-item time{font-size:12px;color:var(--muted)}.timeline-item h3{font-size:16px;margin:4px 0}.timeline-item p{font-size:13px;color:var(--muted);margin:0}
+    .empty{padding:35px 20px;text-align:center;color:var(--muted)}
+    .bottom-nav{position:fixed;z-index:40;left:50%;transform:translateX(-50%);bottom:max(9px,env(safe-area-inset-bottom));width:min(720px,calc(100% - 18px));display:grid;grid-template-columns:repeat(5,1fr);padding:8px;background:rgba(23,26,23,.95);border-radius:22px;box-shadow:0 12px 35px rgba(0,0,0,.25);backdrop-filter:blur(18px)}
+    .nav-btn{border:0;background:transparent;color:#aeb4ad;border-radius:15px;padding:7px 3px;font-size:10px}
+    .nav-btn .app-icon{display:block;width:21px;height:21px;margin:0 auto 4px}.nav-btn.active{background:#fff;color:#171917}
+    .app-icon{flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .home-nearest{padding:24px;background:linear-gradient(145deg,#183426,#2f5540);color:#fff}.home-nearest .sub{color:rgba(255,255,255,.72)}.home-nearest-head{display:flex;justify-content:space-between;gap:15px;align-items:flex-start}.home-nearest h2{font-size:clamp(25px,5vw,36px);margin:8px 0}.home-nearest-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.home-nearest-meta span{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.12);font-size:11px}.home-ready{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:12px;margin-top:20px}.home-ready b{font-size:28px}.home-ready .bar{background:rgba(255,255,255,.16)}.home-todos{margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,.17)}.home-todos h3{margin:0 0 9px;font-size:13px}.home-todos .action-item{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.13);color:#fff}.home-todos .action-item small{color:rgba(255,255,255,.68)}.home-trip-actions{display:flex;justify-content:flex-end;margin-top:14px}.home-trip-actions button{border:0;border-radius:11px;padding:10px 13px;background:#fff;color:var(--dark);font-weight:700}.home-other-trips{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:10px;overflow-x:auto;padding:1px 1px 8px;scroll-snap-type:x proximity}.home-other-trip{scroll-snap-align:start;border:1px solid var(--line);border-radius:17px;background:#fff;padding:15px;text-align:left}.home-other-trip b{display:block;margin:5px 0}.home-other-trip small{color:var(--muted)}
+    .tab:disabled{opacity:.4;cursor:not-allowed}
+    .coming-soon-page{min-height:58vh;display:grid;place-items:center;text-align:center;padding:36px 20px;background:var(--surface);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow)}
+    .coming-soon-page .mark{width:68px;height:68px;display:grid;place-items:center;margin:0 auto 18px;border-radius:22px;background:var(--surface2);font-size:29px;filter:grayscale(1)}
+    .coming-soon-page h1{font-size:clamp(28px,6vw,42px);margin:0 0 12px}.coming-soon-page p{color:var(--muted);margin:0;line-height:1.7}
+    .visitor-footer{max-width:1180px;margin:0 auto;padding:0 16px 12px;text-align:center}.visitor-counter{display:flex;justify-content:center;width:max-content;max-width:100%;margin:auto;color:var(--muted)}.visitor-stat{display:flex;align-items:baseline;gap:4px;padding:2px 9px;border-left:1px solid var(--line);white-space:nowrap}.visitor-stat:first-child{border-left:0}.visitor-stat small{font-size:10px}.visitor-stat b{font-size:12px;color:var(--text)}.live-dot{display:inline-block;width:5px;height:5px;margin-right:3px;border-radius:50%;background:#57a56f}.creator-credit{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:9px;font-size:11px;color:var(--muted)}.creator-credit a{color:inherit;text-decoration:none}.creator-credit a:hover,.creator-credit a:focus-visible{color:var(--accent);text-decoration:underline}.creator-credit .divider{opacity:.45}
+    .hidden{display:none!important}
+    @media(max-width:760px){
+      .trip-summary-grid{grid-template-columns:1fr}.trip-form-section{grid-template-columns:1fr}.trip-form-section .wide{grid-column:auto}
+      .topbar{position:relative;top:auto}.topbar-inner{padding-top:max(15px,env(safe-area-inset-top))}
+      .grid.two,.grid.three,.currency-layout,.choice-grid,.planner-form{grid-template-columns:1fr}.planner-form .wide{grid-column:auto}
+      .quick-grid{grid-template-columns:repeat(2,1fr)}
+      #home-quick-tools{gap:7px}.home-quick-item>.quick{min-height:92px;padding:11px 8px}.home-quick-item .quick .app-icon{margin-bottom:12px}.home-quick-item .quick b{font-size:12px;line-height:1.3;overflow-wrap:anywhere}
+      .check-status{grid-template-columns:1fr}
+      .trip-form-grid{grid-template-columns:1fr}.trip-form-grid .wide{grid-column:auto}
+      .hero{padding:26px 21px}.card{padding:17px}
+      .home-nearest{padding:20px}.home-ready{grid-template-columns:1fr}.home-nearest-head{align-items:center}.home-other-trips{grid-auto-columns:82%}
+      .home-editing .home-layout-section{padding:10px}.home-edit-controls{flex-wrap:wrap}.home-edit-controls .home-fixed-badge{margin-left:auto}
+      .stay-member-row{grid-template-columns:1fr 1fr}.stay-member-row>strong{grid-column:1/-1}.stay-panel-head{align-items:flex-start}
+    }
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.page{animation:none}.home-layout-section{transition:none}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button class="brand" data-go="home"><strong>Festival Passport</strong><span>TRAVEL COMPANION</span></button>
+      <button class="sync-btn" id="sync-indicator" aria-haspopup="dialog">이 기기에 저장 중</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="page active" id="page-home">
+      <div class="hero">
+        <p class="hero-kicker">YOUR FESTIVAL TRAVEL COMPANION</p>
+        <h1>Festival<br>Passport</h1>
+        <p>페스티벌 여행 준비를 한곳에서</p>
+      </div>
+      <div class="home-edit-bar"><button type="button" id="home-edit-toggle" aria-label="홈 화면 편집 시작">홈 편집</button></div>
+      <div id="home-layout-sections">
+        <section class="home-layout-section" data-home-section="nearestTrip" aria-label="가장 가까운 여행 섹션">
+          <div class="section-title"><h2>가장 가까운 여행</h2><p>다음 페스티벌 준비 현황</p></div>
+          <div id="nearest-trip-card"></div>
+        </section>
+        <section class="home-layout-section" data-home-section="upcomingTrips" aria-label="나머지 예정 여행 섹션">
+          <div class="section-title" id="other-trips-title"><h2>나머지 예정 여행</h2><p>이후 일정</p></div>
+          <div class="home-other-trips" id="other-upcoming-trips"></div>
+        </section>
+        <section class="home-layout-section" data-home-section="quickTools" aria-label="빠른 도구 섹션">
+          <div class="section-title"><h2>빠른 도구</h2><p>기록과 비용 관리</p></div>
+          <div class="quick-grid" id="home-quick-tools">
+            <div class="home-quick-item" data-home-tool="worldmap"><button class="quick" data-go="worldmap"><span data-tool-icon="map-pinned"></span><b>Festival World Map</b></button></div>
+            <div class="home-quick-item" data-home-tool="budget"><button class="quick" data-go="budget"><span data-tool-icon="receipt"></span><b>여행비 정산</b></button></div>
+            <div class="home-quick-item" data-home-tool="packing"><button class="quick" data-go="packing"><span data-tool-icon="luggage"></span><b>짐싸기</b></button></div>
+            <div class="home-quick-item" data-home-tool="currency"><button class="quick" data-go="currency"><span data-tool-icon="wallet"></span><b>환전</b></button></div>
+          </div>
+        </section>
+      </div>
+      <div class="home-edit-panel hidden" id="home-edit-panel">
+        <div id="home-hidden-items"></div>
+        <div id="home-hidden-tools"></div>
+        <button type="button" class="secondary-btn" id="home-layout-reset">기본 배치로 초기화</button>
+        <p class="sr-only" id="home-layout-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <dialog class="sync-panel" id="sync-panel" aria-labelledby="sync-panel-title"><div class="sync-panel-inner">
+      <div class="sync-panel-head"><div><h2 id="sync-panel-title" style="margin:0">동기화 설정</h2><p class="sub">같은 이메일로 로그인한 기기끼리 준비 데이터를 연결합니다.</p></div><button class="icon-btn" id="close-sync-settings" aria-label="동기화 설정 닫기">×</button></div>
+      <div class="sync-details"><div class="sync-detail"><span>로그인 상태</span><b id="sync-auth-state">확인 중</b></div><div class="sync-detail"><span>로그인 이메일</span><b id="sync-email-state">–</b></div><div class="sync-detail"><span>마지막 동기화</span><b id="last-sync-state">기록 없음</b></div><div class="sync-detail"><span>로컬 저장</span><b>사용 중</b></div></div>
+      <div id="signed-out-controls"><div class="auth-row"><input id="auth-email" type="email" autocomplete="email" placeholder="이메일 주소" aria-label="동기화 로그인 이메일"><button class="secondary-btn" id="send-login-link">로그인 링크 받기</button></div></div>
+      <div id="signed-in-controls" class="hidden"><div class="button-row"><button class="secondary-btn" id="sync-now">지금 동기화</button><button class="secondary-btn" id="sign-out">로그아웃</button></div></div>
+    </div></dialog>
+
+    <dialog class="trip-form-dialog" id="trip-form-dialog" aria-labelledby="trip-form-title"><div class="trip-form-inner">
+      <div class="sync-panel-head"><div><h2 id="trip-form-title" style="margin:0">새 페스티벌 여행</h2><p class="sub">국내외 어디든 다음 여행을 등록할 수 있습니다.</p></div><button class="icon-btn" id="close-trip-form" aria-label="여행 추가 닫기">×</button></div>
+      <div class="wizard-progress" id="wizard-progress"></div><div class="wizard-meta"><b id="wizard-step-title">기본 정보</b><span id="wizard-step-count">1 / 7</span></div>
+      <form id="custom-trip-form" class="trip-form-grid">
+        <section class="wizard-step active" data-wizard-step="0"><label class="wide">페스티벌명<input name="festivalName" required maxlength="80" placeholder="예: Pentaport Rock Festival"></label><label class="wide">여행 이름<input name="title" required maxlength="80" placeholder="예: Pentaport 2026"></label><div class="wizard-choice wide"><label><input type="radio" name="scope" value="domestic" checked>국내</label><label><input type="radio" name="scope" value="overseas">해외</label></div></section>
+        <section class="wizard-step" data-wizard-step="1"><label>국가<select name="country"><option value="KR">대한민국</option><option value="JP">일본</option><option value="US">미국</option><option value="GB">영국</option><option value="ES">스페인</option><option value="OTHER">기타</option></select></label><label>도시<input name="city" required maxlength="60" placeholder="예: 인천"></label><label>지역<input name="region" maxlength="60" placeholder="예: 송도"></label><label>장소<input name="location" required maxlength="100" placeholder="예: 송도달빛축제공원"></label></section>
+        <section class="wizard-step" data-wizard-step="2"><label>행사 시작일<input name="eventStart" type="date" required></label><label>행사 종료일<input name="eventEnd" type="date" required></label><label>여행 시작일<input name="travelStart" type="date" required></label><label>여행 종료일<input name="travelEnd" type="date" required></label></section>
+        <section class="wizard-step" data-wizard-step="3"><label class="wide">공식 홈페이지<input name="officialUrl" type="url" placeholder="https://"></label><label class="wide">지도 검색어<input name="mapQuery" maxlength="150" placeholder="장소, 도시, 국가"></label><label>위도<input name="latitude" type="number" step="any"></label><label>경도<input name="longitude" type="number" step="any"></label><p class="sub wide">좌표를 비워두면 생성할 때 장소·도시를 한 번 검색합니다. 위치 검색 © OpenStreetMap contributors</p></section>
+        <section class="wizard-step" data-wizard-step="4"><label class="wide">여행 유형<select name="tripType"><option value="urban">도심형 페스티벌</option><option value="camping">캠핑형 페스티벌</option><option value="overseas">일반 해외여행</option><option value="domestic">국내여행</option><option value="custom">직접 선택</option></select></label><div class="wizard-choice wide"><label><input type="checkbox" name="features" value="transport" checked>교통</label><label><input type="checkbox" name="features" value="stay" checked>숙소</label><label><input type="checkbox" name="features" value="packing" checked>짐싸기</label><label><input type="checkbox" name="features" value="budget" checked>비용</label><label><input type="checkbox" name="features" value="readiness" checked>준비도</label></div></section>
+        <section class="wizard-step" data-wizard-step="5"><label class="wide">체크리스트 템플릿<select name="checklistTemplate"><option value="overseas">해외 페스티벌</option><option value="domestic">국내 페스티벌</option><option value="camping">캠핑형 페스티벌</option><option value="urban">도심형 페스티벌</option><option value="empty">빈 목록</option></select></label><p class="sub wide">생성 후에도 준비물 항목을 자유롭게 수정할 수 있습니다.</p></section>
+        <section class="wizard-step" data-wizard-step="6"><div class="wizard-summary wide" id="wizard-summary"></div></section>
+        <div class="button-row wide"><button type="button" class="secondary-btn hidden" id="wizard-prev">이전</button><button type="button" class="primary-btn" id="wizard-next">다음</button><button type="submit" class="primary-btn hidden" id="wizard-submit">여행 생성</button><button type="button" class="secondary-btn" id="cancel-trip-form">취소</button></div>
+      </form>
+      <p class="status-note" id="trip-form-status"></p>
+    </div></dialog>
+
+    <dialog class="sync-panel" id="reset-data-dialog" aria-labelledby="reset-data-title"><div class="sync-panel-inner">
+      <div class="sync-panel-head"><div><h2 id="reset-data-title" style="margin:0">준비 데이터를 초기화할까요?</h2><p class="sub">아래 데이터가 초기 상태로 돌아갑니다.</p></div><button class="icon-btn" id="close-reset-data" aria-label="초기화 확인 닫기">×</button></div>
+      <div class="sync-details"><div>개인 일정과 숙소</div><div>준비도와 짐싸기 목록</div><div>환전과 여행비</div><div>직접 추가한 페스티벌 여행</div></div>
+      <p class="status-note" id="reset-cloud-notice"></p>
+      <div class="button-row"><button class="secondary-btn" id="cancel-reset-data">취소</button><button class="primary-btn" id="confirm-reset-data">모두 초기화</button></div>
+    </div></dialog>
+
+    <section class="page" id="page-trip" aria-live="polite">
+      <div id="trip-detail-head"></div>
+      <div class="tabs" id="trip-detail-tabs" aria-label="여행 상세 메뉴"></div>
+      <div id="trip-detail-content"></div>
+    </section>
+
+    <section class="page" id="page-fuji">
+      <div class="festival-head fuji">
+        <div class="eyebrow">OUTDOOR FESTIVAL</div><h1>Fuji Rock 2026</h1>
+        <div class="chips"><span class="chip">7.24–7.26</span><span class="chip">Naeba Ski Resort</span><span class="chip">여행 7.23–7.27</span></div>
+      </div>
+      <div class="tabs" data-tabs="fuji">
+        <button class="tab active" data-panel="overview">개요</button><button class="tab" data-panel="flight">항공·교통</button>
+        <button class="tab" data-panel="hotel">숙소</button><button class="tab" data-panel="packing">짐싸기</button>
+      </div>
+      <div class="panel active" data-group="fuji" id="fuji-overview">
+          <article class="card"><h2>행사 정보</h2><dl class="info-list">
+            <div class="info-row"><dt>일정</dt><dd>2026년 7월 24일–26일</dd></div>
+            <div class="info-row"><dt>장소</dt><dd>나에바 스키 리조트</dd></div>
+            <div class="info-row"><dt>여행 일정</dt><dd>7월 23일–27일, 4박 5일</dd></div>
+          </dl></article>
+          <article class="card map-card"><h2>행사장 위치</h2><p class="sub">Naeba Ski Resort · Niigata, Japan</p>
+            <iframe class="map-frame" title="후지록 행사장 지도" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=Naeba%20Ski%20Resort%2C%20Niigata%2C%20Japan&amp;output=embed"></iframe>
+            <div class="map-actions">
+              <a class="map-link primary" href="https://www.google.com/maps/search/?api=1&amp;query=Naeba%20Ski%20Resort%2C%20Niigata%2C%20Japan" target="_blank" rel="noreferrer">Google Maps에서 크게 보기</a>
+              <a class="map-link" href="https://www.fujirockfestival.com/" target="_blank" rel="noreferrer">공식 홈페이지</a>
+            </div>
+          </article>
+      </div>
+      <div class="panel" data-group="fuji" id="fuji-flight">
+        <article class="card" id="travel-start"><h2>항공·교통 일정</h2><p class="sub">내 일정은 이 기기에 저장하고, 그룹코드로 친구들과 일정을 함께 볼 수 있습니다.</p>
+          <div class="choice-grid">
+            <button class="choice-card" data-travel-mode="personal"><b>내 일정 만들기</b><span>나만의 비행기·신칸센·렌터카 일정을 입력합니다.</span></button>
+            <button class="choice-card" data-travel-mode="group"><b>그룹 일정 보기</b><span>그룹코드를 입력하거나 새 그룹을 만들어 친구들과 공유합니다.</span></button>
+          </div>
+        </article>
+        <article class="card hidden" id="personal-planner" style="margin-top:14px"><h2>내 여행 일정</h2><p class="sub">로그인하지 않아도 이 기기에만 안전하게 저장됩니다.</p>
+          <form class="planner-form" id="personal-itinerary-form">
+            <label>이름 또는 별명<input name="traveler_name" required maxlength="30"></label>
+            <label>이동수단<select name="kind"><option value="flight">비행기</option><option value="train">신칸센·열차</option><option value="car">렌터카·자동차</option><option value="other">기타</option></select></label>
+            <label>출발지<input name="from_label" required maxlength="50" placeholder="ICN 또는 도쿄역"></label>
+            <label>도착지<input name="to_label" required maxlength="50" placeholder="NRT 또는 에치고유자와"></label>
+            <label>출발 일시<input name="depart_at" type="datetime-local" required></label>
+            <label>도착 일시<input name="arrive_at" type="datetime-local"></label>
+            <label class="wide">항공사·열차·좌석·메모<input name="note" maxlength="200" placeholder="대한항공 · 도키 No.343 · 10호차 7B"></label>
+            <div class="planner-actions wide"><button class="secondary-btn" type="submit">일정 저장</button><button class="secondary-btn" type="button" data-close-planner>닫기</button></div>
+          </form>
+          <div id="personal-itinerary-list" style="margin-top:14px"></div>
+        </article>
+        <article class="card hidden" id="group-access" style="margin-top:14px"><h2>그룹 일정</h2><p class="sub">코드가 확인된 그룹의 일정만 불러옵니다.</p>
+          <div class="auth-row"><input id="group-code-input" autocomplete="off" autocapitalize="characters" maxlength="32" placeholder="그룹코드"><button class="secondary-btn" id="join-group">코드로 입장</button></div>
+          <div class="auth-row"><input id="new-group-name" maxlength="50" placeholder="새 그룹 이름"><button class="secondary-btn" id="create-group">그룹 만들기</button></div>
+          <p class="status-note" id="group-status"></p><div id="new-group-code" class="hidden"></div>
+          <div class="button-row"><button class="secondary-btn" type="button" data-close-planner>닫기</button></div>
+        </article>
+        <div id="group-itinerary" class="hidden">
+        <article class="card" style="margin-top:14px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><h2 id="group-title">일행 항공 일정</h2><p class="sub">이름별 또는 전체 시간순으로 확인할 수 있습니다.</p></div><button class="secondary-btn" id="leave-group">나가기</button></div>
+          <div class="view-switch" role="group" aria-label="항공 일정 보기 방식"><button class="active" data-flight-view="person">이름별 보기</button><button data-flight-view="timeline">시간순 보기</button></div>
+          <div class="flight-view active" id="flight-person-view"><div class="traveler-list" id="fuji-travelers" aria-label="일행 선택"></div><div id="fuji-person-flight"></div></div>
+          <div class="flight-view" id="flight-timeline-view"><div class="flight-timeline" id="fuji-flight-timeline"></div></div>
+        </article>
+        <article class="card" id="fuji-person-movement" style="margin-top:14px"></article>
+        </div>
+      </div>
+      <div class="panel" data-group="fuji" id="fuji-hotel">
+        <article class="card"><h2>내 숙박 계획</h2><p class="sub">캠핑 또는 숙소를 선택해 나만의 정보를 입력하세요. 입력 내용은 이 기기에만 저장됩니다.</p>
+          <form class="planner-form" id="personal-stay-form">
+            <label>숙박 유형<select name="kind"><option value="camping">캠핑</option><option value="lodging">숙소</option></select></label>
+            <label>캠핑장·숙소 이름<input name="name" required maxlength="80" placeholder="예: 나에바 캠핑장"></label>
+            <label>체크인·입장 일시<input name="check_in" type="datetime-local" required></label>
+            <label>체크아웃·퇴장 일시<input name="check_out" type="datetime-local"></label>
+            <label>이용 인원<input name="people" type="number" min="1" max="99" inputmode="numeric" placeholder="1"></label>
+            <label>예약자명<input name="booker" maxlength="30" placeholder="선택 입력"></label>
+            <label class="wide">예약 정보·메모<input name="note" maxlength="200" placeholder="예약번호, 사이트 번호, 준비물 등"></label>
+            <div class="planner-actions wide"><button class="secondary-btn" type="submit">숙박 계획 저장</button></div>
+          </form>
+          <div id="personal-stay-list" style="margin-top:14px"></div>
+        </article>
+      </div>
+      <div class="panel" data-group="fuji" id="fuji-packing"><div data-checklist="fuji"></div></div>
+    </section>
+
+    <section class="page" id="page-sonic">
+      <div class="coming-soon-page"><div><div class="mark">♫</div><p class="hero-kicker">SUMMER SONIC 2026</p><h1>아직 준비 중이에요</h1><p>일정이 조금 더 선명해지면<br>필요한 정보만 깔끔하게 열어둘게요.</p></div></div>
+    </section>
+
+    <section class="page" id="page-packing">
+      <div class="section-title" style="margin-top:3px"><h2>짐싸기</h2><p>페스티벌별 분리 저장</p></div>
+      <div class="tabs" id="packing-tabs"><button class="tab active" data-pack="fuji">🏕 후지록</button><button class="tab" data-pack="sonic">🎵 섬머소닉 도쿄</button></div>
+      <div id="packing-master"></div>
+    </section>
+
+    <section class="page" id="page-currency">
+      <div class="section-title" style="margin-top:3px"><h2>환전</h2><p id="exchange-section-state">기능 사용 안 함</p></div>
+      <article class="card exchange-off" id="exchange-off-panel"><div class="mark">👛</div><h3>환율 기능을 사용하지 않고 있어요</h3><p class="sub">필요할 때 켜면 기준환율 조회와 환전 계산기를 사용할 수 있습니다.</p><button class="primary-btn" id="enable-exchange" style="margin-top:16px">환율 기능 켜기</button></article>
+      <div class="exchange-content" id="exchange-content" aria-hidden="true">
+      <div class="currency-layout">
+        <article class="card"><h3>현재 참고 환율</h3><label class="input-wrap">기준 통화<select id="exchange-currency"><option value="JPY">일본 엔화 (JPY)</option><option value="USD">미국 달러 (USD)</option><option value="GBP">영국 파운드 (GBP)</option><option value="EUR">유로 (EUR)</option></select></label><div class="rate-big" id="rate-view">불러오는 중</div><div class="rate-state" id="rate-state">Frankfurter API 연결 중</div>
+          <p class="status-note" id="currency-change-status" aria-live="polite"></p>
+          <div class="button-row"><button class="primary-btn" id="save-exchange-currency">통화 변경하기</button><button id="refresh-rate" class="secondary-btn">환율 새로고침</button></div>
+        </article>
+        <article class="card"><h3 id="holdings-title">보유 외화</h3>
+          <div class="input-wrap"><label for="wallet-yen">트래블월렛</label><div class="money-input"><input id="wallet-yen" inputmode="decimal" value="" placeholder="미등록"><span id="wallet-currency-unit">JPY</span></div></div>
+          <div class="input-wrap"><label for="cash-yen">현금</label><div class="money-input"><input id="cash-yen" inputmode="decimal" value="" placeholder="미등록"><span id="cash-currency-unit">JPY</span></div></div>
+          <div class="result"><small>총 보유액</small><b id="total-yen">미등록</b></div>
+          <div class="button-row"><button class="primary-btn" id="save-holdings">저장</button><button class="secondary-btn" id="reset-holdings">초기화</button><button class="secondary-btn" id="disable-exchange">환율 기능 끄기</button></div>
+          <p class="status-note" id="holdings-save-status" aria-live="polite"></p>
+        </article>
+      </div>
+      <article class="card" style="margin-top:15px"><h3>환전 계산기</h3>
+        <div class="grid two">
+          <div class="input-wrap"><label for="yen-input" id="foreign-input-label">외화 금액</label><div class="money-input"><input id="yen-input" inputmode="decimal" value="" placeholder="금액 입력"><span id="foreign-input-code">JPY</span></div><div class="result"><small>예상 원화</small><b id="krw-result">–</b></div></div>
+          <div class="input-wrap"><label for="krw-input">원화 금액</label><div class="money-input"><input id="krw-input" inputmode="numeric" value="" placeholder="금액 입력"><span>KRW</span></div><div class="result"><small id="foreign-result-label">예상 외화</small><b id="yen-result">–</b></div></div>
+        </div>
+        <p class="sub">은행·카드사·환전 서비스의 실제 적용 환율과 차이가 있을 수 있습니다.</p>
+      </article>
+      </div>
+    </section>
+
+    <section class="page" id="page-trips">
+      <div class="section-title" style="margin-top:3px"><h2>Upcoming Trips</h2><p>내가 준비하는 페스티벌 여행</p></div>
+      <div class="button-row" style="margin-bottom:15px"><button class="secondary-btn" id="restore-default-trips">기본 여행 복원</button></div>
+      <div class="grid two" id="trip-library"></div>
+    </section>
+
+    <section class="page" id="page-worldmap">
+      <div class="section-title" style="margin-top:3px"><h2>Festival World Map</h2><p>등록한 여행의 국가와 도시</p></div>
+      <article class="card"><div id="festival-world-map" class="world-map" aria-label="페스티벌 여행 세계 지도"></div><p class="sub" id="world-map-status">여행 위치를 지도에 표시하는 중입니다.</p></article>
+      <div class="section-title"><h2>My Festival Destinations</h2><p id="world-map-count">0개 여행</p></div>
+      <div class="world-map-list" id="world-map-list"></div>
+    </section>
+
+    <section class="page" id="page-budget">
+      <div class="section-title" style="margin-top:3px"><h2>여행비 정산</h2><p>금액은 이 기기에 자동 저장</p></div>
+      <div class="grid" id="budget-cards"></div>
+    </section>
+
+    <section class="page" id="page-mypage">
+      <div class="section-title" style="margin-top:3px"><h2>마이페이지</h2><p>내 정보와 저장 상태</p></div>
+      <div class="grid two">
+        <article class="card"><h3>로그인 정보</h3><dl class="info-list"><div class="info-row"><dt>상태</dt><dd id="mypage-auth-state">확인 중</dd></div><div class="info-row"><dt>이메일</dt><dd id="mypage-email">–</dd></div><div class="info-row"><dt>마지막 동기화</dt><dd id="mypage-last-sync">기록 없음</dd></div></dl><div class="button-row"><button class="primary-btn" id="mypage-open-sync">로그인·동기화 설정</button><button class="secondary-btn hidden" id="mypage-sync-now">지금 동기화</button></div></article>
+        <article class="card"><h3>저장된 데이터</h3><dl class="info-list"><div class="info-row"><dt>현재 여행</dt><dd id="mypage-trip-count">0개</dd></div><div class="info-row"><dt>과거 기록</dt><dd id="mypage-past-count">0개</dd></div><div class="info-row"><dt>개인 교통</dt><dd id="mypage-transport-count">0개</dd></div><div class="info-row"><dt>숙박</dt><dd id="mypage-stay-count">0개</dd></div><div class="info-row"><dt>짐싸기</dt><dd id="mypage-packing-count">0개</dd></div></dl><p class="sub" id="mypage-storage-note">이 브라우저에 저장 중입니다.</p></article>
+      </div>
+      <article class="card" style="margin-top:15px"><h3>데이터 관리</h3><p class="sub">초기화하면 여행 일정, 숙소, 준비도, 짐싸기, 환전과 비용 데이터가 처음 상태로 돌아갑니다.</p><div class="button-row"><button class="secondary-btn" id="mypage-reset-data">준비 데이터 초기화</button></div></article>
+    </section>
+  </main>
+
+  <footer class="visitor-footer" aria-label="방문 현황">
+    <div class="visitor-counter">
+      <div class="visitor-stat"><small>오늘 방문자</small><b id="daily-visitors">–</b></div>
+      <div class="visitor-stat"><small><span class="live-dot"></span>현재 접속 중</small><b id="live-visitors">–</b></div>
+      <div class="visitor-stat"><small>누적 방문자</small><b id="total-visitors">–</b></div>
+    </div>
+    <div class="creator-credit" aria-label="제작자 링크">
+      <span>Festival Passport by illuvision</span><span class="divider">·</span>
+      <a href="https://blog.naver.com/illuvision" target="_blank" rel="noopener noreferrer">Blog</a><span class="divider">·</span>
+      <a href="https://www.instagram.com/illuvision_/" target="_blank" rel="noopener noreferrer">Instagram @illuvision_</a>
+    </div>
+  </footer>
+
+  <nav class="bottom-nav" id="bottom-nav" aria-label="주 메뉴"></nav>
+</div>
+<script src="./config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+if("scrollRestoration" in history)history.scrollRestoration="manual";
+window.addEventListener("pageshow",()=>{if(!location.hash||location.hash==="#home")requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"auto"}))});
+const isGuestAccess=()=>false;
+
+const DEFAULT_CHECKLISTS={
+fuji:[
+["★★★★★",["여권","항공권","여행자보험","후지록 티켓·QR 또는 손목밴드","신칸센","환전(일본 엔화)","해외결제·외화카드","신용카드","일본 교통카드","eSIM","휴대폰","휴대폰 보조배터리"]],
+["★★★★",["캐리어","보조가방","장바구니","카메라","메모리카드","충전케이블","충전 어댑터","스마트워치 충전기","멀티플러그","멀티탭","무선 이어폰","티셔츠","셔츠","긴바지","반바지","잠옷","바람막이","속옷","양말","머리끈","등산화","샌들","슬리퍼","우비"]],
+["★★★",["감기약","해열·진통제","소화제","변비약","지사제","상처 연고","방수테이프","습윤밴드","일반 밴드","벌레 물린 약","숙취해소제","샴푸","바디워시","세안제","치약","칫솔","빗","선크림","토너패드","클렌징 패드","마스크팩","립밤","건식 타월","수건","손수건","물티슈","티슈","쿨링티슈"]],
+["★★",["접이식 우산","텀블러","지퍼백","돗자리","캠핑의자"]],
+["★",["선글라스","모자","이어플러그","휴대폰 방수팩","손선풍기","접이식 옷걸이","세탁망","세탁세제","네임펜","주방세제","수세미","일회용 장갑"]]
+],
+sonic:[
+["★★★★★",["여권","항공권","여행자보험","섬머소닉 티켓·QR","해외결제·외화카드","신용카드","일본 교통카드","eSIM","휴대폰","휴대폰 보조배터리"]],
+["★★★★",["캐리어","공연용 소형가방","충전케이블","충전 어댑터","스마트워치 충전기","멀티플러그","무선 이어폰","티셔츠","반바지","잠옷","속옷","양말","편한 운동화","슬리퍼"]],
+["★★★",["해열·진통제","소화제","변비약","지사제","일반 밴드","샴푸","바디워시","세안제","치약","칫솔","빗","선크림","토너패드","클렌징 패드","립밤","수건","손수건","물티슈","티슈","쿨링티슈"]],
+["★★",["접이식 우산","텀블러","지퍼백","손선풍기","갈아입을 상의","얇은 겉옷"]],
+["★",["선글라스","모자","이어플러그","휴대폰 방수팩","접이식 옷걸이","세탁망","세탁세제"]]
+]};
+
+let FUJI_FLIGHTS=[];
+let FUJI_MOVEMENT={};
+let FUJI_TRAVELERS=[];
+const escapeHTML=value=>String(value??"").replace(/[&<>'"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[char]));
+const flightTime=value=>new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",weekday:"short",hour:"numeric",minute:"2-digit"}).format(new Date(value));
+const flightDate=value=>new Intl.DateTimeFormat("ko-KR",{timeZone:"Asia/Seoul",month:"numeric",day:"numeric",weekday:"short"}).format(new Date(value));
+const flightDisplayTime=(flight,key)=>flight.timeUnknown?`${flightDate(flight[key])} 시간 미등록`:flightTime(flight[key]);
+function flightCard(f){return `<div class="flight"><div class="airport"><b>${f.from}</b><small>${flightDisplayTime(f,"depart")}<br>${f.fromDetail}</small></div><div class="arrow">→<br><small>${f.airline}</small></div><div class="airport"><b>${f.to}</b><small>${flightDisplayTime(f,"arrive")}<br>${f.toDetail}</small></div></div>`}
+function movementFestivalRow(){return{label:"페스티벌",value:"7월 24일–26일 · Fuji Rock Festival · Naeba Ski Resort"}}
+function cleanMovementText(value){return String(value||"").replace(/^\s*→\s*(?:·\s*)?/,"").replace(/^\s*·\s*/,"").trim()}
+function mergeMovementValues(rows){const parts=rows.flatMap(row=>cleanMovementText(row.value).split(" · ")).map(part=>part.trim()).filter(part=>part&&!/^신칸센$|^열차$|^이동$|^렌터카$/.test(part)),unique=[...new Set(parts)];return unique.sort((a,b)=>{const rank=value=>/\d{1,2}:\d{2}.*→/.test(value)?0:/도키/.test(value)?1:/호차|좌석/.test(value)?2:3;return rank(a)-rank(b)}).join(" · ")}
+function orderedMovement(name,rows){const train=rows.filter(row=>row.kind==="train"||/신칸센|도키/.test(row.value)),car=rows.filter(row=>row.kind==="car"||/렌터카/.test(row.value)),other=rows.filter(row=>!train.includes(row)&&!car.includes(row));if(train.length&&car.length){let carValue=mergeMovementValues(car);if(/렌터카.*합류/.test(carValue)&&!/도쿄/.test(carValue))carValue+=" · 도쿄 이동";return[{label:"출발",value:mergeMovementValues(train)},...other,movementFestivalRow(),{label:"귀가",value:carValue}]}return rows.map(row=>({...row,value:cleanMovementText(row.value)}))}
+function renderTraveler(name){
+ document.querySelectorAll(".traveler-btn").forEach(b=>b.classList.toggle("active",b.dataset.traveler===name));
+ const flights=FUJI_FLIGHTS.filter(f=>f.name===name),hasReturn=flights.some(f=>f.direction==="귀국");
+ document.getElementById("fuji-person-flight").innerHTML=`<div class="flight-person-head"><h3>${name}</h3><span>${flights[0]?.airline||"항공 일정 미등록"}</span></div>${flights.length?flights.map(f=>`<p class="sub" style="margin-top:12px">${f.direction} 일정</p>${flightCard(f)}`).join("")+(hasReturn?"":'<p class="sub" style="margin-top:14px">귀국 일정은 아직 등록되지 않았습니다.</p>'):'<p class="sub" style="margin-top:14px">등록된 항공 일정이 없습니다.</p>'}`;
+ const movement=orderedMovement(name,FUJI_MOVEMENT[name]||[]);
+ document.getElementById("fuji-person-movement").innerHTML=`<h2>이동</h2><p class="sub">${name} 이동 일정</p><dl class="info-list">${movement.map(row=>`<div class="info-row"><dt>${row.label}</dt><dd>${row.value}</dd></div>`).join("")}</dl>`;
+}
+function initFujiFlights(){
+ const travelers=document.getElementById("fuji-travelers");
+ if(!FUJI_TRAVELERS.length){travelers.innerHTML='<p class="sub">로그인 후 비공개 일행 정보를 불러옵니다.</p>';document.getElementById("fuji-person-flight").innerHTML="";document.getElementById("fuji-person-movement").innerHTML='<h2>이동</h2><p class="sub">로그인 후 확인할 수 있습니다.</p>';document.getElementById("fuji-flight-timeline").innerHTML="";return}
+ travelers.innerHTML=FUJI_TRAVELERS.map((name,index)=>`<button class="traveler-btn ${index===0?"active":""}" data-traveler="${name}">${name}</button>`).join("");
+ travelers.querySelectorAll(".traveler-btn").forEach(button=>button.onclick=()=>renderTraveler(button.dataset.traveler));
+ renderTraveler(FUJI_TRAVELERS[0]);
+ const timelineItems=[...FUJI_FLIGHTS,{type:"festival",depart:"2026-07-24T00:00:00+09:00"}].sort((a,b)=>new Date(a.depart)-new Date(b.depart));
+ document.getElementById("fuji-flight-timeline").innerHTML=timelineItems.map(f=>f.type==="festival"?`<div class="flight-timeline-item festival"><time>7월 24일–26일</time><h3>후지록 페스티벌 기간</h3><p>Naeba Ski Resort · 3일간 진행</p></div>`:`<div class="flight-timeline-item"><time>${flightDisplayTime(f,"depart")}</time><h3>${f.name} · ${f.airline}</h3><p>${f.timeUnknown?`${f.from} → ${f.to} · 시간 미등록 · ${f.direction}`:`${f.from} ${flightTime(f.depart).split(" ").slice(-2).join(" ")} → ${f.to} ${flightTime(f.arrive).split(" ").slice(-2).join(" ")} · ${f.direction}`}</p></div>`).join("");
+ document.querySelectorAll("[data-flight-view]").forEach(button=>button.onclick=()=>{const personView=button.dataset.flightView==="person";document.querySelectorAll("[data-flight-view]").forEach(b=>b.classList.toggle("active",b===button));document.getElementById("flight-person-view").classList.toggle("active",personView);document.getElementById("flight-timeline-view").classList.toggle("active",!personView);document.getElementById("fuji-person-movement").hidden=!personView});
+}
+initFujiFlights();
+function applyPrivateData(privateData){FUJI_FLIGHTS=Array.isArray(privateData?.flights)?privateData.flights:[];FUJI_MOVEMENT=privateData?.movement&&typeof privateData.movement==="object"?privateData.movement:{};FUJI_TRAVELERS=[...new Set([...FUJI_FLIGHTS.map(f=>f.name),...Object.keys(FUJI_MOVEMENT)])].sort((a,b)=>a.localeCompare(b,"ko"));initFujiFlights()}
+
+const PERSONAL_ITINERARY_KEY="travel-companion-personal-itinerary-v1";
+const ACTIVE_GROUP_KEY="travel-companion-active-group-v1";
+let dashboardReady=false;
+let activeGroupId=sessionStorage.getItem(ACTIVE_GROUP_KEY)||null;
+let activeGroupTripId="fuji";
+let activeGroupName="",activeGroupOwnerId="",activeGroupStays=[],groupStayView="person",selectedGroupStayMember="";
+const planner=document.getElementById("personal-planner"),groupAccess=document.getElementById("group-access"),groupArea=document.getElementById("group-itinerary");
+document.querySelectorAll("[data-travel-mode]").forEach(button=>button.onclick=()=>{const personal=button.dataset.travelMode==="personal";planner.classList.toggle("hidden",!personal);groupAccess.classList.toggle("hidden",personal);if(personal)renderPersonalItineraries()});
+document.querySelectorAll("[data-close-planner]").forEach(button=>button.onclick=()=>{planner.classList.add("hidden");groupAccess.classList.add("hidden")});
+function personalItineraries(){const value=readJSON(PERSONAL_ITINERARY_KEY,[]);return Array.isArray(value)?value:[]}
+function itinerarySummary(item){const kind={flight:"비행기",train:"신칸센·열차",car:"렌터카·자동차",other:"기타"}[item.kind]||"이동";const when=item.depart_at?new Intl.DateTimeFormat("ko-KR",{dateStyle:"medium",timeStyle:"short"}).format(new Date(item.depart_at)):"시간 미정";return{kind,when}}
+function personalFlightCard(item){const flight={from:escapeHTML(item.from_label),to:escapeHTML(item.to_label),depart:item.depart_at,arrive:item.arrive_at||item.depart_at,fromDetail:"출발",toDetail:"도착",airline:escapeHTML(item.note||"항공 정보"),timeUnknown:!item.arrive_at};return`<div class="itinerary-item personal-ticket"><div class="personal-ticket-head"><h3>${escapeHTML(item.traveler_name)} · 내 항공 일정</h3><span>항공권</span></div>${flightCard(flight)}<div class="button-row">${activeGroupId?`<button class="secondary-btn" data-share-itinerary="${item.id}">현재 그룹에 공유</button>`:""}<button class="secondary-btn" data-delete-itinerary="${item.id}">삭제</button></div></div>`}
+function renderPersonalItineraries(){
+ const root=document.getElementById("personal-itinerary-list"),items=personalItineraries().sort((a,b)=>String(a.depart_at).localeCompare(String(b.depart_at)));
+ root.innerHTML=items.length?items.map(item=>{if(item.kind==="flight")return personalFlightCard(item);const s=itinerarySummary(item);return`<div class="itinerary-item"><h3>${escapeHTML(item.traveler_name)} · ${s.kind}</h3><p>${s.when} · ${escapeHTML(item.from_label)} → ${escapeHTML(item.to_label)}${item.note?`<br>${escapeHTML(item.note)}`:""}</p><div class="button-row">${activeGroupId?`<button class="secondary-btn" data-share-itinerary="${item.id}">현재 그룹에 공유</button>`:""}<button class="secondary-btn" data-delete-itinerary="${item.id}">삭제</button></div></div>`}).join(""):'<p class="sub">저장된 개인 일정이 없습니다.</p>';
+ root.querySelectorAll("[data-delete-itinerary]").forEach(button=>button.onclick=()=>{writeJSON(PERSONAL_ITINERARY_KEY,personalItineraries().filter(item=>item.id!==button.dataset.deleteItinerary));renderPersonalItineraries()});
+ root.querySelectorAll("[data-share-itinerary]").forEach(button=>button.onclick=()=>shareItinerary(button.dataset.shareItinerary));
+ if(dashboardReady)renderDashboard();
+}
+document.getElementById("personal-itinerary-form").addEventListener("submit",event=>{event.preventDefault();const form=new FormData(event.currentTarget),item=Object.fromEntries(form.entries());item.id=crypto.randomUUID();const items=personalItineraries();items.push(item);writeJSON(PERSONAL_ITINERARY_KEY,items);event.currentTarget.reset();renderPersonalItineraries();scheduleCloudSave()});
+function setGroupStatus(message){document.getElementById("group-status").textContent=message}
+async function ensureGroupUser(){
+ if(!cloudClient)throw new Error("그룹 서버 설정이 없습니다.");
+ if(cloudUser)return cloudUser;
+ const {data,error}=await cloudClient.auth.signInAnonymously();if(error)throw error;cloudUser=data.user;return cloudUser;
+}
+async function joinGroup(){
+ const code=document.getElementById("group-code-input").value.trim();if(!code){setGroupStatus("그룹코드를 입력해 주세요.");return}
+ try{setGroupStatus("그룹을 확인하는 중");await ensureGroupUser();const {data,error}=await cloudClient.rpc("join_travel_group",{p_code:code});if(error)throw error;activeGroupId=typeof data==="string"?data:data?.group_id;sessionStorage.setItem(ACTIVE_GROUP_KEY,activeGroupId);document.getElementById("group-code-input").value="";await loadActiveGroup()}catch(error){setGroupStatus(error.message.includes("invalid_group_code")?"그룹코드를 확인해 주세요.":"그룹에 입장하지 못했습니다.")}
+}
+async function createGroup(){
+ const name=document.getElementById("new-group-name").value.trim();if(!name){setGroupStatus("그룹 이름을 입력해 주세요.");return}
+ try{setGroupStatus("그룹을 만드는 중");await ensureGroupUser();const tripId=currentTrip?.id||"fuji";let response=await cloudClient.rpc("create_trip_group",{p_name:name,p_trip_id:tripId});if(response.error&&tripId==="fuji")response=await cloudClient.rpc("create_travel_group",{p_name:name});if(response.error)throw response.error;const result=Array.isArray(response.data)?response.data[0]:response.data;activeGroupId=result.group_id;activeGroupTripId=tripId;sessionStorage.setItem(ACTIVE_GROUP_KEY,activeGroupId);const codeBox=document.getElementById("new-group-code");codeBox.className="group-code";codeBox.textContent=result.invite_code;document.getElementById("new-group-name").value="";await loadActiveGroup();setGroupStatus("그룹코드를 친구에게 공유하세요. 이 화면을 닫기 전에 따로 보관해 주세요.")}catch(error){setGroupStatus("그룹을 만들지 못했습니다. Trip Engine 서버 설정을 확인해 주세요.")}
+}
+async function loadActiveGroup(){
+ if(!activeGroupId||!cloudClient||!cloudUser)return;
+ const [{data:groups,error:groupError},{data:items,error:itemError}]=await Promise.all([cloudClient.from("travel_groups").select("*").eq("id",activeGroupId).maybeSingle(),cloudClient.from("travel_itineraries").select("*").eq("group_id",activeGroupId).order("depart_at")]);
+ if(groupError||itemError||!groups){activeGroupId=null;sessionStorage.removeItem(ACTIVE_GROUP_KEY);setGroupStatus("그룹을 다시 확인해 주세요.");return}
+ activeGroupTripId=groups.trip_id||"fuji";activeGroupName=groups.name||"그룹";activeGroupOwnerId=groups.owner_id||"";document.getElementById("group-title").textContent=activeGroupName;groupArea.classList.remove("hidden");groupAccess.classList.add("hidden");
+ const flights=(items||[]).filter(item=>item.kind==="flight").map(item=>({id:item.id,name:escapeHTML(item.traveler_name),airline:escapeHTML(item.carrier||item.note||"항공사 미등록"),direction:escapeHTML(item.direction||"이동"),depart:item.depart_at,arrive:item.arrive_at||item.depart_at,from:escapeHTML(item.from_label),to:escapeHTML(item.to_label),fromDetail:escapeHTML(item.from_detail||""),toDetail:escapeHTML(item.to_detail||""),timeUnknown:!item.arrive_at}));
+ const movement={};(items||[]).filter(item=>item.kind!=="flight"&&!String(item.note||"").startsWith(SHARED_STAY_PREFIX)).forEach(item=>{const name=escapeHTML(item.traveler_name),from=String(item.from_label||"").trim(),to=String(item.to_label||"").trim(),note=String(item.note||"").trim(),route=from&&to?`${escapeHTML(from)} → ${escapeHTML(to)}`:"",value=[route,note?escapeHTML(note):""].filter(Boolean).join(" · ");(movement[name]??=[]).push({kind:item.kind,label:{train:"열차",car:"렌터카",other:"이동"}[item.kind]||"이동",value,departAt:item.depart_at||null})});
+ activeGroupStays=(items||[]).filter(item=>String(item.note||"").startsWith(SHARED_STAY_PREFIX)).map(parseSharedStay).filter(Boolean);applyPrivateData({flights,movement});setGroupStatus("");renderPersonalItineraries();if(currentTripTab==="stay"&&currentTrip?.id===activeGroupTripId)renderTripPanel("stay",false);
+}
+async function shareItinerary(id){
+ const item=personalItineraries().find(value=>value.id===id);if(!item||!activeGroupId)return;
+ try{await ensureGroupUser();const payload={group_id:activeGroupId,owner_id:cloudUser.id,traveler_name:item.traveler_name,kind:item.kind,depart_at:item.depart_at?new Date(item.depart_at).toISOString():null,arrive_at:item.arrive_at?new Date(item.arrive_at).toISOString():null,from_label:item.from_label,to_label:item.to_label,note:item.note||null};if(activeGroupTripId!=="fuji")payload.trip_id=activeGroupTripId;const {error}=await cloudClient.from("travel_itineraries").insert(payload);if(error)throw error;await loadActiveGroup()}catch(error){alert("그룹에 일정을 공유하지 못했습니다.")}
+}
+document.getElementById("join-group").onclick=joinGroup;document.getElementById("create-group").onclick=createGroup;
+document.getElementById("leave-group").onclick=()=>{activeGroupId=null;activeGroupName="";activeGroupOwnerId="";activeGroupStays=[];sessionStorage.removeItem(ACTIVE_GROUP_KEY);groupArea.classList.add("hidden");applyPrivateData(null);groupAccess.classList.remove("hidden");renderPersonalItineraries();if(currentTripTab==="stay")renderTripPanel("stay",false)};
+const storageKey=t=>["fuji","sonic"].includes(t)?`travel-companion-${t}-checks`:`festival-passport-trip-${t}-checks-v1`;
+function readJSON(key,fallback={}){try{return JSON.parse(localStorage.getItem(key))??fallback}catch{return fallback}}
+function writeJSON(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false}}
+function removeStored(key){try{localStorage.removeItem(key)}catch{}}
+const TRIP_DEFINITIONS=[
+ {id:"fuji",slug:"fuji",title:"Fuji Rock 2026",festivalName:"Fuji Rock Festival",countryCode:"JP",countryName:"Japan",city:"Naeba",region:"Niigata",location:"Naeba Ski Resort",latitude:36.789,longitude:138.783,eventStart:"2026-07-24",eventEnd:"2026-07-26",travelStart:"2026-07-23",travelEnd:"2026-07-27",status:"booked",theme:"fuji",icon:"🏕",officialUrl:"https://www.fujirockfestival.com/",enabledFeatures:{itinerary:false}},
+ {id:"sonic",slug:"sonic",title:"Summer Sonic Tokyo 2026",festivalName:"Summer Sonic Tokyo",countryCode:"JP",countryName:"Japan",city:"Chiba",region:"Chiba",location:"ZOZO Marine Stadium & Makuhari Messe",latitude:35.645,longitude:140.034,eventStart:"2026-08-14",eventEnd:"2026-08-16",travelStart:"2026-08-13",travelEnd:"2026-08-17",status:"booked",theme:"sonic",icon:"🎵",officialUrl:"https://www.summersonic.com/",enabledFeatures:{itinerary:false}}
+];
+const CUSTOM_TRIPS_KEY="festival-passport-custom-trips-v1";
+const HIDDEN_DEFAULT_TRIPS_KEY="festival-passport-hidden-default-trips-v1";
+const PAST_RECORDS_KEY="festival-passport-past-festivals-v1";
+function customTrips(){const value=readJSON(CUSTOM_TRIPS_KEY,[]);return Array.isArray(value)?value.filter(trip=>trip&&trip.id&&trip.title&&trip.eventStart):[]}
+function hiddenDefaultTrips(){const value=readJSON(HIDDEN_DEFAULT_TRIPS_KEY,[]);return Array.isArray(value)?value:[]}
+function pastFestivalRecords(){const value=readJSON(PAST_RECORDS_KEY,[]);return Array.isArray(value)?value.filter(record=>record&&record.id&&record.title&&record.eventStart):[]}
+const COUNTRY_NAMES={KR:"대한민국",JP:"Japan",US:"United States",GB:"United Kingdom",ES:"Spain",OTHER:"기타"};
+const TRIP_FEATURES={overview:true,itinerary:false,transport:true,stay:true,packing:true,budget:true,group:true};
+function normalizeTrip(trip){return{...trip,slug:trip.slug||trip.id,countryCode:trip.countryCode||trip.country||"OTHER",countryName:trip.countryName||COUNTRY_NAMES[trip.countryCode||trip.country]||"기타",city:trip.city||trip.location||"미등록",location:trip.location||trip.city||"미등록",enabledFeatures:{...TRIP_FEATURES,...(trip.enabledFeatures||{}),itinerary:false},schemaVersion:2}}
+function allTrips(){const hidden=hiddenDefaultTrips();return[...TRIP_DEFINITIONS.filter(trip=>!hidden.includes(trip.id)),...customTrips()].map(normalizeTrip).sort((a,b)=>a.eventStart.localeCompare(b.eventStart))}
+function findTrip(ref){return allTrips().find(trip=>trip.id===ref||trip.slug===ref)||null}
+const CURRENT_TRIP_KEY="festival-passport-current-trip-v1";
+const tripEventsKey=id=>`festival-passport-trip-${id}-events-v1`;
+const tripStaysKey=id=>`festival-passport-trip-${id}-stays-v1`;
+const tripBudgetKey=id=>`festival-passport-trip-${id}-budget-v1`;
+function tripEvents(id){const value=readJSON(tripEventsKey(id),[]);return Array.isArray(value)?value:[]}
+function tripStays(id){if(id==="fuji")return personalStays();return normalizeStays(readJSON(tripStaysKey(id),[]),id)}
+function tripBudget(id){const value=readJSON(tripBudgetKey(id),[]);return Array.isArray(value)?value:[]}
+function tripTransport(id){return(id==="fuji"?personalItineraries():[]).concat(tripEvents(id).filter(item=>item.type==="transport"))}
+const GA_EVENT_PARAMETERS=new Set(["trip_id","trip_status","section","feature","view","format","source","success","count_bucket","country_code","trip_type","checklist_template","travel_year","festival_name","completion_percent","days_until_event","forecast_stage","agreement_level","preparedness_level","cache_used","stay_type","member_count","nights"]);let lastTrackedPage="";
+function analyticsPayload(params={}){const safe={};Object.entries(params).forEach(([key,value])=>{if(!GA_EVENT_PARAMETERS.has(key)||value===undefined||value===null||value==="")return;if(key==="success")safe[key]=Boolean(value);else if(key==="completion_percent")safe[key]=Math.max(0,Math.min(100,Math.round(Number(value)||0)));else safe[key]=String(value).slice(0,key==="festival_name"?100:80)});return safe}
+function analyticsDebug(name,payload){if(window.FESTIVAL_ANALYTICS?.debug)console.info("[GA]",name,payload)}
+function trackEvent(name,params={}){try{const payload=analyticsPayload(params);analyticsDebug(name,payload);if(!window.FESTIVAL_ANALYTICS?.enabled||typeof window.gtag!=="function")return;window.gtag("event",name,payload)}catch(error){console.warn("Analytics event skipped",error)}}
+function trackPageView(pagePath,pageTitle){try{if(!pagePath||lastTrackedPage===pagePath)return false;lastTrackedPage=pagePath;const payload={page_title:pageTitle||"Festival Passport",page_location:`${location.origin}${pagePath}`,page_path:pagePath};analyticsDebug("page_view",payload);if(window.FESTIVAL_ANALYTICS?.enabled&&typeof window.gtag==="function")window.gtag("event","page_view",payload);return true}catch(error){console.warn("Analytics page view skipped",error);return false}}
+function analyticsCountBucket(value){const count=Number(value)||0;return count===0?"0":count<=10?"1_10":count<=50?"11_50":count<=100?"51_100":"101_plus"}
+function tripAnalytics(trip,extra={}){return{trip_id:trip?.id,trip_status:trip?.status,country_code:trip?.countryCode,trip_type:trip?.tripType||trip?.theme,travel_year:trip?.travelStart?.slice(0,4),festival_name:trip?.festivalName||trip?.title,...extra}}
+const HOME_LAYOUT_KEY="festival-passport-home-layout-v1",HOME_SECTION_IDS=["nearestTrip","upcomingTrips","quickTools"],HOME_HIDEABLE_IDS=new Set(["upcomingTrips","quickTools"]),HOME_SECTION_LABELS={nearestTrip:"가장 가까운 여행",upcomingTrips:"나머지 예정 여행",quickTools:"빠른 도구"},DEFAULT_HOME_LAYOUT={version:1,order:[...HOME_SECTION_IDS],hidden:[]};
+const HOME_QUICK_TOOLS_KEY="festival-passport-home-quick-tools-v1",HOME_TOOL_IDS=["worldmap","budget","packing","currency"],HOME_TOOL_LABELS={worldmap:"Festival World Map",budget:"여행비 정산",packing:"짐싸기",currency:"환전"},DEFAULT_HOME_QUICK_TOOLS={version:1,order:[...HOME_TOOL_IDS],hidden:[]};
+let homeEditMode=false,draggedHomeSection=null;
+function normalizeHomeLayout(value){const source=value&&typeof value==="object"?value:{},order=[],hidden=[];if(Array.isArray(source.order))source.order.forEach(id=>{if(HOME_SECTION_IDS.includes(id)&&!order.includes(id))order.push(id)});HOME_SECTION_IDS.forEach(id=>{if(!order.includes(id))order.push(id)});if(Array.isArray(source.hidden))source.hidden.forEach(id=>{if(HOME_HIDEABLE_IDS.has(id)&&!hidden.includes(id))hidden.push(id)});return{version:1,order,hidden}}
+function homeLayout(){return normalizeHomeLayout(readJSON(HOME_LAYOUT_KEY,DEFAULT_HOME_LAYOUT))}
+function announceHomeLayout(message){const status=document.getElementById("home-layout-status");if(status){status.textContent="";requestAnimationFrame(()=>status.textContent=message)}}
+function saveHomeLayout(layout,eventName,sectionId){const normalized=normalizeHomeLayout(layout);writeJSON(HOME_LAYOUT_KEY,normalized);applyHomeLayout(normalized);if(eventName)trackEvent(eventName,{section:"home",feature:sectionId});return normalized}
+function homeControlMarkup(id){const label=HOME_SECTION_LABELS[id],fixed=!HOME_HIDEABLE_IDS.has(id);return`<div class="home-edit-controls" aria-label="${label} 편집 도구"><button type="button" class="home-edit-control home-drag-handle" draggable="true" data-home-drag="${id}" aria-label="${label} 드래그하여 이동">☷</button><button type="button" class="home-edit-control" data-home-move="up" data-home-id="${id}" aria-label="${label} 위로 이동">↑</button><button type="button" class="home-edit-control" data-home-move="down" data-home-id="${id}" aria-label="${label} 아래로 이동">↓</button>${fixed?'<span class="home-fixed-badge">고정</span>':`<button type="button" class="home-edit-control" data-home-hide="${id}" aria-label="${label} 숨기기">숨기기</button>`}</div>`}
+function applyHomeLayout(layout=homeLayout()){const container=document.getElementById("home-layout-sections");if(!container)return;const normalized=normalizeHomeLayout(layout);normalized.order.forEach(id=>{const section=container.querySelector(`[data-home-section="${id}"]`);if(section){container.appendChild(section);section.classList.toggle("home-layout-hidden",normalized.hidden.includes(id))}});document.getElementById("page-home").classList.toggle("home-editing",homeEditMode);renderHiddenHomeItems(normalized);refreshHomeMoveButtons(normalized)}
+function renderHiddenHomeItems(layout){const root=document.getElementById("home-hidden-items");if(!root)return;const buttons=layout.hidden.map(id=>`<button type="button" class="home-restore-btn" data-home-restore="${id}">＋ ${HOME_SECTION_LABELS[id]}</button>`).join("");root.innerHTML=`<h3>숨긴 항목</h3>${buttons?`<div class="home-hidden-list">${buttons}</div>`:'<p class="home-edit-empty">숨긴 항목이 없습니다.</p>'}`;root.querySelectorAll("[data-home-restore]").forEach(button=>button.onclick=()=>{const id=button.dataset.homeRestore,next=homeLayout();next.hidden=next.hidden.filter(value=>value!==id);saveHomeLayout(next,"home_section_restore",id);announceHomeLayout(`${HOME_SECTION_LABELS[id]}을 복구했습니다.`)})}
+function visibleHomeOrder(layout){return layout.order.filter(id=>!layout.hidden.includes(id))}
+function refreshHomeMoveButtons(layout=homeLayout()){const visible=visibleHomeOrder(layout);document.querySelectorAll("[data-home-move]").forEach(button=>{const index=visible.indexOf(button.dataset.homeId);button.disabled=button.dataset.homeMove==="up"?index<=0:index<0||index>=visible.length-1})}
+function moveHomeSection(id,direction){const layout=homeLayout(),visible=visibleHomeOrder(layout),current=visible.indexOf(id),target=direction==="up"?current-1:current+1;if(current<0||target<0||target>=visible.length)return;const other=visible[target],from=layout.order.indexOf(id),to=layout.order.indexOf(other);[layout.order[from],layout.order[to]]=[layout.order[to],layout.order[from]];saveHomeLayout(layout,"home_section_move",id);announceHomeLayout(`${HOME_SECTION_LABELS[id]}을 ${direction==="up"?"위":"아래"}로 이동했습니다.`);document.querySelector(`[data-home-move="${direction}"][data-home-id="${id}"]`)?.focus()}
+function dropHomeSection(id,targetId){if(!id||id===targetId)return;const layout=homeLayout(),from=layout.order.indexOf(id),to=layout.order.indexOf(targetId);if(from<0||to<0)return;layout.order.splice(from,1);layout.order.splice(to,0,id);saveHomeLayout(layout,"home_section_move",id);announceHomeLayout(`${HOME_SECTION_LABELS[id]}의 순서를 변경했습니다.`)}
+function normalizeHomeQuickTools(value){const source=value&&typeof value==="object"?value:{},order=[],hidden=[];if(Array.isArray(source.order))source.order.forEach(id=>{if(HOME_TOOL_IDS.includes(id)&&!order.includes(id))order.push(id)});HOME_TOOL_IDS.forEach(id=>{if(!order.includes(id))order.push(id)});if(Array.isArray(source.hidden))source.hidden.forEach(id=>{if(HOME_TOOL_IDS.includes(id)&&!hidden.includes(id))hidden.push(id)});return{version:1,order,hidden}}
+function homeQuickTools(){return normalizeHomeQuickTools(readJSON(HOME_QUICK_TOOLS_KEY,DEFAULT_HOME_QUICK_TOOLS))}
+function saveHomeQuickTools(value,eventName,id){const normalized=normalizeHomeQuickTools(value);writeJSON(HOME_QUICK_TOOLS_KEY,normalized);renderHomeQuickTools(normalized);if(eventName)trackEvent(eventName,{section:"quick_tools",feature:id});return normalized}
+function homeToolControls(id){const label=HOME_TOOL_LABELS[id];return`<div class="home-tool-controls" aria-label="${label} 편집 도구"><button type="button" class="home-tool-control" data-home-tool-move="up" data-home-tool-id="${id}" aria-label="${label} 위로 이동">↑</button><button type="button" class="home-tool-control" data-home-tool-move="down" data-home-tool-id="${id}" aria-label="${label} 아래로 이동">↓</button><button type="button" class="home-tool-control home-tool-delete" data-home-tool-hide="${id}" aria-label="${label} 빠른 도구에서 삭제">삭제</button></div>`}
+function renderHiddenHomeTools(layout){const root=document.getElementById("home-hidden-tools");if(!root)return;const buttons=layout.hidden.map(id=>`<button type="button" class="home-restore-btn" data-home-tool-restore="${id}">＋ ${HOME_TOOL_LABELS[id]}</button>`).join("");root.className="home-hidden-tools";root.innerHTML=`<h3>삭제한 빠른 도구</h3>${buttons?`<div class="home-hidden-list">${buttons}</div>`:'<p class="home-edit-empty">삭제한 도구가 없습니다.</p>'}`;root.querySelectorAll("[data-home-tool-restore]").forEach(button=>button.onclick=()=>{const id=button.dataset.homeToolRestore,next=homeQuickTools();next.hidden=next.hidden.filter(value=>value!==id);saveHomeQuickTools(next,"home_section_restore",id);announceHomeLayout(`${HOME_TOOL_LABELS[id]} 도구를 추가했습니다.`)})}
+function renderHomeQuickTools(layout=homeQuickTools()){const root=document.getElementById("home-quick-tools");if(!root)return;const normalized=normalizeHomeQuickTools(layout);normalized.order.forEach(id=>{const item=root.querySelector(`[data-home-tool="${id}"]`);if(item){root.appendChild(item);item.classList.toggle("home-tool-hidden",normalized.hidden.includes(id))}});const visible=normalized.order.filter(id=>!normalized.hidden.includes(id));root.dataset.visibleCount=String(Math.max(1,visible.length));root.querySelectorAll("[data-home-tool-move]").forEach(button=>{const index=visible.indexOf(button.dataset.homeToolId);button.disabled=button.dataset.homeToolMove==="up"?index<=0:index<0||index>=visible.length-1});renderHiddenHomeTools(normalized)}
+function moveHomeTool(id,direction){const layout=homeQuickTools(),visible=layout.order.filter(value=>!layout.hidden.includes(value)),current=visible.indexOf(id),target=direction==="up"?current-1:current+1;if(current<0||target<0||target>=visible.length)return;const other=visible[target],from=layout.order.indexOf(id),to=layout.order.indexOf(other);[layout.order[from],layout.order[to]]=[layout.order[to],layout.order[from]];saveHomeQuickTools(layout,"home_section_move",id);announceHomeLayout(`${HOME_TOOL_LABELS[id]} 도구를 ${direction==="up"?"위":"아래"}로 이동했습니다.`);document.querySelector(`[data-home-tool-move="${direction}"][data-home-tool-id="${id}"]`)?.focus()}
+function initHomeQuickTools(){const root=document.getElementById("home-quick-tools");if(!root)return;root.querySelectorAll("[data-home-tool]").forEach(item=>{const id=item.dataset.homeTool;item.insertAdjacentHTML("afterbegin",homeToolControls(id));item.querySelectorAll("[data-home-tool-move]").forEach(button=>button.onclick=()=>moveHomeTool(button.dataset.homeToolId,button.dataset.homeToolMove));item.querySelector("[data-home-tool-hide]").onclick=event=>{const hiddenId=event.currentTarget.dataset.homeToolHide,next=homeQuickTools();next.hidden.push(hiddenId);saveHomeQuickTools(next,"home_section_hide",hiddenId);announceHomeLayout(`${HOME_TOOL_LABELS[hiddenId]} 도구를 삭제했습니다.`)}});const normalized=homeQuickTools();writeJSON(HOME_QUICK_TOOLS_KEY,normalized);renderHomeQuickTools(normalized)}
+function setHomeEditMode(enabled){homeEditMode=enabled;const button=document.getElementById("home-edit-toggle"),panel=document.getElementById("home-edit-panel");button.textContent=enabled?"완료":"홈 편집";button.setAttribute("aria-label",enabled?"홈 화면 편집 완료":"홈 화면 편집 시작");panel.classList.toggle("hidden",!enabled);applyHomeLayout();trackEvent(enabled?"home_edit_open":"home_edit_complete",{section:"home"});if(!enabled)button.focus()}
+function initHomeLayout(){const container=document.getElementById("home-layout-sections");if(!container)return;container.querySelectorAll("[data-home-section]").forEach(section=>{const id=section.dataset.homeSection;section.insertAdjacentHTML("afterbegin",homeControlMarkup(id));section.querySelectorAll("[data-home-move]").forEach(button=>button.onclick=()=>moveHomeSection(button.dataset.homeId,button.dataset.homeMove));section.querySelector("[data-home-hide]")?.addEventListener("click",event=>{const hiddenId=event.currentTarget.dataset.homeHide,layout=homeLayout();layout.hidden.push(hiddenId);saveHomeLayout(layout,"home_section_hide",hiddenId);announceHomeLayout(`${HOME_SECTION_LABELS[hiddenId]}을 숨겼습니다.`)});const handle=section.querySelector("[data-home-drag]");handle.addEventListener("dragstart",event=>{draggedHomeSection=id;section.classList.add("home-dragging");event.dataTransfer.effectAllowed="move";event.dataTransfer.setData("text/plain",id)});handle.addEventListener("dragend",()=>{draggedHomeSection=null;document.querySelectorAll(".home-layout-section").forEach(node=>node.classList.remove("home-dragging","home-drop-target"))});section.addEventListener("dragover",event=>{if(!homeEditMode||!draggedHomeSection)return;event.preventDefault();section.classList.add("home-drop-target")});section.addEventListener("dragleave",()=>section.classList.remove("home-drop-target"));section.addEventListener("drop",event=>{event.preventDefault();section.classList.remove("home-drop-target");dropHomeSection(draggedHomeSection||event.dataTransfer.getData("text/plain"),id)})});document.getElementById("home-edit-toggle").onclick=()=>setHomeEditMode(!homeEditMode);document.getElementById("home-layout-reset").onclick=()=>{saveHomeLayout(DEFAULT_HOME_LAYOUT,"home_layout_reset","default");saveHomeQuickTools(DEFAULT_HOME_QUICK_TOOLS,null,"default");announceHomeLayout("홈을 기본 배치로 초기화했습니다.")};initHomeQuickTools();const normalized=homeLayout();writeJSON(HOME_LAYOUT_KEY,normalized);applyHomeLayout(normalized)}
+const GEOCODE_CACHE_KEY="festival-passport-geocode-cache-v1";
+function tripHasCoordinates(item){return item.latitude!==null&&item.latitude!==undefined&&item.latitude!==""&&item.longitude!==null&&item.longitude!==undefined&&item.longitude!==""&&Number.isFinite(Number(item.latitude))&&Number.isFinite(Number(item.longitude))}
+async function resolvePlaceCoordinates(item){if(tripHasCoordinates(item))return[Number(item.latitude),Number(item.longitude)];const query=String(item.mapQuery||[item.location,item.city,item.countryName||COUNTRY_NAMES[item.countryCode||item.country]].filter(Boolean).join(", ")).trim();if(!query)return null;const cache=readJSON(GEOCODE_CACHE_KEY,{}),cacheKey=query.toLowerCase();if(Array.isArray(cache[cacheKey]))return cache[cacheKey];try{const base=window.TRAVEL_CONFIG?.geocoderUrl||"https://nominatim.openstreetmap.org/search",url=`${base}?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,response=await fetch(url,{headers:{Accept:"application/json"}});if(!response.ok)return null;const result=(await response.json())[0],point=result?[Number(result.lat),Number(result.lon)]:null;if(point?.every(Number.isFinite)){cache[cacheKey]=point;writeJSON(GEOCODE_CACHE_KEY,cache);return point}}catch(error){console.warn("Place lookup failed",error)}return null}
+async function resolveCurrentTripLocation(){if(!currentTrip?.custom)return;const button=document.getElementById("resolve-trip-location");if(button){button.disabled=true;button.textContent="위치 찾는 중"}const point=await resolvePlaceCoordinates(currentTrip);if(!point){if(button){button.disabled=false;button.textContent="다시 위치 찾기"}return alert("장소를 찾지 못했습니다. 지도 검색어나 위도·경도를 확인해 주세요.")}const updated=customTrips().map(trip=>trip.id===currentTrip.id?{...trip,latitude:point[0],longitude:point[1],updatedAt:new Date().toISOString()}:trip);writeJSON(CUSTOM_TRIPS_KEY,updated);currentTrip=findTrip(currentTrip.id);scheduleCloudSave();renderTripPanel("overview");toastMessage("지도 위치를 저장했습니다.")}
+function toastMessage(message){const old=document.querySelector(".app-toast");old?.remove();const node=document.createElement("div");node.className="archive-toast app-toast";node.textContent=message;document.body.appendChild(node);setTimeout(()=>node.remove(),2600)}
+function saveCustomTrips(items){writeJSON(CUSTOM_TRIPS_KEY,items);renderDashboard();scheduleCloudSave()}
+function removeTrip(id){const trip=findTrip(id);if(TRIP_DEFINITIONS.some(value=>value.id===id))writeJSON(HIDDEN_DEFAULT_TRIPS_KEY,[...new Set([...hiddenDefaultTrips(),id])]);else writeJSON(CUSTOM_TRIPS_KEY,customTrips().filter(value=>value.id!==id));trackEvent("trip_deleted",tripAnalytics(trip,{source:"upcoming_trips"}));renderPackingTabs();renderDashboard();scheduleCloudSave();if(!findTrip(id)&&currentTrip?.id===id)go("trips")}
+const READINESS_KEY="festival-passport-readiness-v1";
+const READINESS_ITEMS=[
+ {id:"ticket",label:"티켓",weight:3,page:"fuji",panel:"overview"},{id:"passport",label:"여권",weight:3,page:"packing"},{id:"flight",label:"항공",weight:3,page:"fuji",panel:"flight"},{id:"lodging",label:"숙소",weight:3,page:"fuji",panel:"hotel"},
+ {id:"insurance",label:"여행자보험",weight:2,page:"packing"},{id:"local_transport",label:"현지 교통",weight:2,page:"fuji",panel:"flight"},{id:"esim",label:"eSIM",weight:2,page:"packing"},{id:"exchange",label:"환전",weight:1,page:"currency"},{id:"packing",label:"짐싸기",weight:1,page:"packing",derived:true}
+];
+const READINESS_STATES={not_registered:{label:"미등록",score:0},pending:{label:"확인 필요",score:.25},in_progress:{label:"진행 중",score:.5},completed:{label:"완료",score:1},not_required:{label:"필요 없음",score:0}};
+function readinessData(){const value=readJSON(READINESS_KEY,{});return value&&typeof value==="object"?value:{}}
+function tripReadinessStates(tripId){const all=readinessData(),current=all[tripId]&&typeof all[tripId]==="object"?all[tripId]:{};return {...current}}
+function saveReadinessState(tripId,itemId,state){const all=readinessData();all[tripId]={...(all[tripId]||{}),[itemId]:state};writeJSON(READINESS_KEY,all);const trip=findTrip(tripId),pct=readinessSummary(tripId).pct;trackEvent("readiness_updated",tripAnalytics(trip,{feature:itemId,completion_percent:pct}));if(pct===100)trackEvent("readiness_completed",tripAnalytics(trip,{completion_percent:pct}));renderDashboard();scheduleCloudSave()}
+function packingStats(type){const groups=getChecklistDefinition(type),all=groups.flatMap(group=>group.items),saved=getSaved(type),checked=all.filter(item=>saved[item.id]).length;return{checked,total:all.length,pct:all.length?Math.round(checked/all.length*100):0}}
+function checklistReadiness(tripId,terms){const groups=getChecklistDefinition(tripId),items=groups.flatMap(group=>group.items),saved=getSaved(tripId),matches=items.filter(item=>terms.some(term=>item.label.toLowerCase().includes(term.toLowerCase()))),checked=matches.filter(item=>saved[item.id]).length;if(!matches.length)return{state:"not_registered",detail:"짐싸기에서 항목 추가"};return{state:checked===matches.length?"completed":checked?"in_progress":"not_registered",detail:`짐싸기 ${checked}/${matches.length} 체크`}}
+function autoReadiness(item,tripId,packing){
+ if(item.id==="packing")return{state:packing.pct===100?"completed":packing.pct>0?"in_progress":"not_registered",progress:packing.pct,detail:`${packing.checked}/${packing.total}개 준비`};
+ if(item.id==="ticket")return checklistReadiness(tripId,[tripId==="fuji"?"후지록 티켓":tripId==="sonic"?"섬머소닉 티켓":"페스티벌 티켓"]);
+ if(item.id==="passport")return checklistReadiness(tripId,["여권"]);
+ if(item.id==="insurance")return checklistReadiness(tripId,["여행자보험"]);
+ if(item.id==="esim")return checklistReadiness(tripId,["esim"]);
+ if(item.id==="flight"){const count=tripTransport(tripId).filter(value=>value.kind==="flight").length;return{state:count?"completed":"not_registered",detail:count?`항공 일정 ${count}개 등록`:"교통 일정에서 등록"}}
+ if(item.id==="local_transport"){const count=tripTransport(tripId).filter(value=>value.kind!=="flight").length;return{state:count?"completed":"not_registered",detail:count?`이동 일정 ${count}개 등록`:"교통 일정에서 등록"}}
+ if(item.id==="lodging"){const count=tripStays(tripId).length;return{state:count?"completed":"not_registered",detail:count?`숙박 계획 ${count}개 등록`:"숙소에서 등록"}}
+ if(item.id==="exchange"){const settings=readJSON("festival-passport-exchange-settings-v1",{});if(!settings.enabled)return{state:"not_required",detail:"환율 기능 사용 안 함"};const code=["JPY","USD","GBP","EUR"].includes(settings.baseCurrency)?settings.baseCurrency:"JPY",all=readJSON("festival-passport-currency-holdings-v2",{}),holdings=all[code]||(code==="JPY"?readJSON("travel-companion-yen-holdings",{wallet:null,cash:null}):{wallet:null,cash:null}),registered=holdings&&[holdings.wallet,holdings.cash].some(value=>value!==null&&value!==undefined&&value!=="");return{state:registered?"completed":"in_progress",detail:registered?`보유 ${code} 등록`:`${code} 환율 사용 중`}}
+ return{state:"not_registered",detail:"정보 없음"};
+}
+function readinessSummary(tripId){const packing=packingStats(tripId);let earned=0,total=0;const rows=READINESS_ITEMS.map(item=>({...item,...autoReadiness(item,tripId,packing),auto:true}));rows.forEach(item=>{if(item.state==="not_required")return;total+=item.weight;earned+=item.weight*(item.progress!==undefined?item.progress/100:READINESS_STATES[item.state].score)});return{rows,pct:total?Math.round(earned/total*100):0,packing}}
+function localToday(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
+function dayDifference(date){const today=Date.parse(localToday()+"T00:00:00Z"),target=Date.parse(date+"T00:00:00Z");return Math.round((target-today)/86400000)}
+function ddayLabel(date){const n=dayDifference(date);return n>0?`D-${n}`:n===0?"D-DAY":`D+${Math.abs(n)}`}
+function shortDateRange(start,end){const a=start.split("-").map(Number),b=end.split("-").map(Number);return`${a[1]}.${a[2]}–${b[1]}.${b[2]}`}
+function nextTrip(){const trips=allTrips();return trips.filter(trip=>trip.status!=="cancelled"&&dayDifference(trip.travelEnd)>=0).sort((a,b)=>a.eventStart.localeCompare(b.eventStart))[0]||trips[0]}
+function openTrip(trip){openTripDetail(trip.id)}
+function openReadinessItem(trip,item){const mapped={overview:"overview",flight:"transport",hotel:"stay"}[item.panel];if(mapped||item.id==="packing")return openTripDetail(trip.id,mapped||"packing");go(item.page)}
+const tripStatusLabels={planning:"계획 중",booked:"예약 진행",ready:"준비 완료",traveling:"여행 중",completed:"완료",cancelled:"취소"};
+function tripCardHTML(item){const ready=readinessSummary(item.id);return`<article class="card event-card ${item.theme||"fuji"}" tabindex="0" role="button" data-trip-open="${item.id}"><div><div class="event-icon">${item.icon||"🎪"}</div><span class="trip-status">${tripStatusLabels[item.status]||"계획 중"}</span><h2 style="margin-top:10px">${escapeHTML(item.title)}</h2><p class="sub">${shortDateRange(item.eventStart,item.eventEnd)} · ${escapeHTML(item.location)}</p><p class="sub">Travel ${shortDateRange(item.travelStart,item.travelEnd)}</p><div class="custom-trip-actions"><button type="button" data-delete-trip="${item.id}">목록에서 삭제</button></div></div><div class="event-meta"><div class="dday">${ddayLabel(item.eventStart)}</div><div class="progress-mini"><span>${ready.pct}% Ready</span><div class="bar"><span style="width:${ready.pct}%"></span></div></div></div></article>`}
+function bindTripCards(root){root.querySelectorAll("[data-trip-open]").forEach(card=>{card.onclick=event=>{if(event.target.closest("[data-delete-trip]"))return;const trip=findTrip(card.dataset.tripOpen);if(trip)openTrip(trip)};card.onkeydown=event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();card.click()}}});root.querySelectorAll("[data-delete-trip]").forEach(button=>button.onclick=()=>{if(confirm("이 여행을 목록에서 삭제할까요? 저장한 세부 데이터는 보존됩니다."))removeTrip(button.dataset.deleteTrip)})}
+function renderTripLibrary(){const root=document.getElementById("trip-library");if(!root)return;root.innerHTML=allTrips().map(tripCardHTML).join("")+`<button class="card add-trip-card" data-open-trip-form><div><span>＋</span><h3>새 페스티벌 여행</h3><p class="sub">다른 페스티벌을 추가하세요</p></div></button>`;bindTripCards(root);root.querySelector("[data-open-trip-form]").onclick=openTripForm}
+function renderDashboard(){
+ const trips=allTrips().filter(item=>item.status!=="cancelled"&&dayDifference(item.eventEnd)>=0).sort((a,b)=>a.eventStart.localeCompare(b.eventStart)),trip=trips[0],nearestRoot=document.getElementById("nearest-trip-card"),othersRoot=document.getElementById("other-upcoming-trips"),othersTitle=document.getElementById("other-trips-title");
+ if(!trip){nearestRoot.innerHTML=`<button class="card add-trip-card" id="open-trip-form"><div><span>＋</span><h3>새 페스티벌 여행</h3><p class="sub">국내외 페스티벌을 직접 추가하세요</p></div></button>`;document.getElementById("open-trip-form").onclick=openTripForm;othersRoot.innerHTML="";othersTitle.classList.add("hidden");renderTripLibrary();return}
+ const summary=readinessSummary(trip.id),actionPriority=["passport","ticket","flight","lodging","insurance","local_transport","esim","exchange","packing"],allActions=actionPriority.map(id=>summary.rows.find(item=>item.id===id)).filter(item=>item&&item.state!=="completed"&&item.state!=="not_required"),actions=allActions.slice(0,3),todoHTML=actions.length?actions.map(item=>{const label=item.id==="packing"&&summary.packing.total?`짐싸기 미완료 ${summary.packing.total-summary.packing.checked}개`:item.label+" "+READINESS_STATES[item.state].label;return`<button class="action-item" data-action-item="${item.id}"><span class="action-icon">•</span><span><b>${label}</b><small>${escapeHTML(item.detail)}</small></span><span aria-hidden="true">→</span></button>`}).join(""):'<p class="sub">필수 준비가 완료됐어요.</p>';
+ nearestRoot.innerHTML=`<article class="card home-nearest"><div class="home-nearest-head"><div><span class="trip-status">${tripStatusLabels[trip.status]||"계획 중"}</span><h2>${escapeHTML(trip.title)}</h2><p class="sub">${escapeHTML(trip.location)} · ${escapeHTML(trip.city)}</p></div><div class="dday">${ddayLabel(trip.eventStart)}</div></div><div class="home-nearest-meta"><span>${shortDateRange(trip.eventStart,trip.eventEnd)}</span><span>Travel ${shortDateRange(trip.travelStart,trip.travelEnd)}</span></div><div class="home-ready"><b>${summary.pct}%</b><div><span class="sub">준비도</span><div class="bar"><span style="width:${summary.pct}%"></span></div></div></div><div class="home-todos"><h3>다음 할 일</h3><div class="action-list">${todoHTML}</div>${allActions.length>3?`<button class="secondary-btn" data-open-all-todos style="margin-top:8px">외 ${allActions.length-3}개 · 전체 보기</button>`:""}</div><div class="home-trip-actions"><button type="button" data-open-nearest>여행 상세 보기</button></div></article>`;
+ nearestRoot.querySelectorAll("[data-action-item]").forEach(button=>button.onclick=()=>openReadinessItem(trip,summary.rows.find(item=>item.id===button.dataset.actionItem)));nearestRoot.querySelector("[data-open-nearest]").onclick=()=>openTrip(trip);nearestRoot.querySelector("[data-open-all-todos]")?.addEventListener("click",()=>openTrip(trip));
+ const remaining=trips.slice(1);othersTitle.classList.toggle("hidden",remaining.length===0);othersRoot.innerHTML=remaining.map(item=>`<button class="home-other-trip" data-other-trip="${item.id}"><small>${ddayLabel(item.eventStart)} · ${shortDateRange(item.eventStart,item.eventEnd)}</small><b>${escapeHTML(item.title)}</b><small>${escapeHTML(item.location)}</small></button>`).join("");othersRoot.querySelectorAll("[data-other-trip]").forEach(button=>button.onclick=()=>openTrip(findTrip(button.dataset.otherTrip)));renderTripLibrary();
+}
+renderPersonalItineraries();
+const PERSONAL_STAY_KEY="travel-companion-personal-stays-v1";
+const STAY_PAYMENT_STATUSES=new Set(["unknown","unpaid","partial","paid"]),STAY_CURRENCIES=new Set(["KRW","JPY","USD","EUR","GBP"]);
+function stayDateValue(value){if(typeof value!=="string"||!value)return"";const match=value.match(/^\d{4}-\d{2}-\d{2}/);return match?match[0]:""}
+function normalizeStayMember(value,index=0){const source=value&&typeof value==="object"?value:{},name=String(source.name||"").trim().slice(0,30);return{personId:String(source.personId||`member-${index}`).slice(0,80),name,checkIn:stayDateValue(source.checkIn||source.check_in),checkOut:stayDateValue(source.checkOut||source.check_out),amount:Number.isFinite(Number(source.amount))&&Number(source.amount)>0?Number(source.amount):0,paymentStatus:STAY_PAYMENT_STATUSES.has(source.paymentStatus)?source.paymentStatus:"unknown"}}
+function normalizeStay(value,index=0,tripId="fuji"){const source=value&&typeof value==="object"?value:{},type=source.type==="group"?"group":"personal",members=Array.isArray(source.members)?source.members.map(normalizeStayMember).filter(member=>member.name):[];return{id:String(source.id||`stay-${index}`).slice(0,100),tripId:String(source.tripId||tripId),type,kind:source.kind==="camping"?"camping":"lodging",name:String(source.name||"").slice(0,80),checkIn:stayDateValue(source.checkIn||source.check_in),checkOut:stayDateValue(source.checkOut||source.check_out),roomType:String(source.roomType||"").slice(0,80),address:String(source.address||"").slice(0,160),reservationName:String(source.reservationName||source.booker||"").slice(0,50),bookingPlatform:String(source.bookingPlatform||"").slice(0,60),bookingNumber:String(source.bookingNumber||"").slice(0,80),totalPrice:Number.isFinite(Number(source.totalPrice))&&Number(source.totalPrice)>0?Number(source.totalPrice):0,currency:STAY_CURRENCIES.has(source.currency)?source.currency:"JPY",paymentStatus:STAY_PAYMENT_STATUSES.has(source.paymentStatus)?source.paymentStatus:"unknown",members,memo:String(source.memo||source.note||"").slice(0,500),ownerId:String(source.ownerId||""),createdAt:String(source.createdAt||""),updatedAt:String(source.updatedAt||"")}}
+function normalizeStays(value,tripId){return Array.isArray(value)?value.map((item,index)=>normalizeStay(item,index,tripId)).filter(item=>item.name):[]}
+function personalStays(){return normalizeStays(readJSON(PERSONAL_STAY_KEY,[]),"fuji")}
+function formatStayDate(value){if(!value)return "미정";const date=new Date(value);return Number.isNaN(date.getTime())?"미정":new Intl.DateTimeFormat("ko-KR",{month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(date)}
+function renderPersonalStays(){
+ const root=document.getElementById("personal-stay-list"),items=personalStays();
+ root.innerHTML=items.length?items.map(item=>`<div class="itinerary-item"><h3>${item.type==="group"?"그룹":"개인"} · ${escapeHTML(item.name)}</h3><p>${formatStayDate(item.checkIn)} → ${formatStayDate(item.checkOut)}</p></div>`).join(""):'<p class="sub">저장된 숙박 계획이 없습니다.</p>';
+ root.querySelectorAll("[data-delete-stay]").forEach(button=>button.onclick=()=>{writeJSON(PERSONAL_STAY_KEY,personalStays().filter(item=>item.id!==button.dataset.deleteStay));renderPersonalStays()});
+ if(dashboardReady)renderDashboard();
+}
+document.getElementById("personal-stay-form").addEventListener("submit",event=>{event.preventDefault();const source=Object.fromEntries(new FormData(event.currentTarget).entries()),now=new Date().toISOString(),item=normalizeStay({...source,id:crypto.randomUUID(),type:"personal",checkIn:source.check_in,checkOut:source.check_out,reservationName:source.booker,memo:source.note,createdAt:now,updatedAt:now},0,"fuji"),items=personalStays();items.push(item);writeJSON(PERSONAL_STAY_KEY,items);event.currentTarget.reset();renderPersonalStays();scheduleCloudSave()});
+renderPersonalStays();
+function getSaved(t){const saved=readJSON(storageKey(t),{});return saved&&typeof saved==="object"?saved:{}}
+const checklistDefinitionKey=type=>["fuji","sonic"].includes(type)?`travel-companion-${type}-checklist-v1`:`festival-passport-trip-${type}-checklist-v1`;
+const checklistWashKey=type=>["fuji","sonic"].includes(type)?`travel-companion-${type}-checklist-wash-v1`:`festival-passport-trip-${type}-checklist-wash-v1`;
+const CHECKLIST_WASH_MAP={"트래블월렛 카드":"해외결제·외화카드","카드(비자, 마스터)":"신용카드","파스모":"일본 교통카드","21인치 캐리어":"캐리어","SD카드":"메모리카드","애플워치 충전선":"스마트워치 충전기","4구 멀티탭":"멀티탭","에어팟 프로":"무선 이어폰","티셔츠 2벌":"티셔츠","셔츠 1벌":"셔츠","청바지 1벌":"긴바지","양말 5켤레":"양말","킨 뉴포트 샌들":"샌들","타이레놀":"해열·진통제","후시딘":"상처 연고","듀오덤":"습윤밴드","밴드":"일반 밴드","알디콤":"숙취해소제","폼클렌저":"세안제","스킨팩":"마스크팩","건식 타올":"건식 타월","3단 우산":"접이식 우산","레고트 텀블러 500ml":"텀블러","Loop 이어플러그":"이어플러그","휴대폰 방수팩(예보 확인 후)":"휴대폰 방수팩","세탁시트":"세탁세제","니트릴장갑":"일회용 장갑"};
+function defaultChecklistDefinition(type){let index=0;const fallback=[["필수 서류",["페스티벌 티켓","신분증·여권","여행자보험"]],["의류와 현장 준비",["편한 옷","편한 신발","우비·우산","이어플러그"]],["전자기기",["휴대폰 충전기","보조배터리"]],["개인용품",["세면도구","상비약"]]];return(DEFAULT_CHECKLISTS[type]||fallback).map(([label,items])=>({label,items:items.map(item=>({id:`${type}-${index++}`,label:item}))}))}
+function getChecklistDefinition(type){const saved=readJSON(checklistDefinitionKey(type),null);let groups=Array.isArray(saved)&&saved.every(group=>group&&Array.isArray(group.items))?saved:defaultChecklistDefinition(type);if(!readJSON(checklistWashKey(type),false)){groups=groups.map(group=>({...group,items:group.items.map(item=>({...item,label:CHECKLIST_WASH_MAP[item.label]||item.label}))}));writeJSON(checklistDefinitionKey(type),groups);writeJSON(checklistWashKey(type),true)}return groups}
+function saveChecklistDefinition(type,groups){writeJSON(checklistDefinitionKey(type),groups);rerenderChecklist(type);scheduleCloudSave()}
+function rerenderChecklist(type){document.querySelectorAll(`[data-checklist="${type}"]`).forEach(root=>renderChecklist(type,root));if(masterType===type)renderChecklist(type,document.getElementById("packing-master"))}
+function renderChecklist(type,target){
+ const el=typeof target==="string"?document.querySelector(target):target;if(!el)return;
+ const saved=getSaved(type),groups=getChecklistDefinition(type);
+ el.innerHTML=`<div class="check-toolbar"><div class="check-status"><div><b><span data-checked="${type}">0</span> / <span data-total="${type}">0</span>개 준비 완료</b><div class="bar" style="background:#deded7;margin-top:8px"><span data-progress="${type}" style="background:#171a17"></span></div></div><div class="check-group-tools"><button data-reset="${type}">전체 해제</button><button data-restore="${type}">기본 목록</button><button class="packing-home-btn" data-packing-home="${type}">저장하고 홈으로</button></div></div></div>`+
+ groups.map((group,gi)=>`<section class="check-group"><div class="check-group-head"><span>${escapeHTML(group.label)}</span><div class="check-group-tools"><span data-count="${type}-${gi}"></span><button class="check-edit-btn" data-add-check="${gi}">+ 추가</button></div></div>${group.items.map(item=>`<div class="check-item"><label><input type="checkbox" aria-label="${escapeHTML(item.label)}" data-check="${type}" data-group="${gi}" data-id="${escapeHTML(item.id)}" ${saved[item.id]?"checked":""}><input class="check-label-input" aria-label="준비물 이름" data-label-check="${escapeHTML(item.id)}" data-group-index="${gi}" maxlength="80" value="${escapeHTML(item.label)}"></label><div class="check-item-actions"><button data-delete-check="${escapeHTML(item.id)}" data-group-index="${gi}">삭제</button></div></div>`).join("")}</section>`).join("");
+ el.querySelectorAll(`[data-check="${type}"]`).forEach(i=>i.addEventListener("change",()=>{const s=getSaved(type);s[i.dataset.id]=i.checked;writeJSON(storageKey(type),s);syncChecklist(type);const stats=packingStats(type),trip=findTrip(type),eventName=i.checked?"packing_item_checked":"packing_item_unchecked";trackEvent(eventName,tripAnalytics(trip,{feature:i.dataset.id,completion_percent:stats.pct}));trackEvent("readiness_updated",tripAnalytics(trip,{feature:"packing",completion_percent:readinessSummary(type).pct}));if(stats.pct===100)trackEvent("packing_completed",tripAnalytics(trip,{completion_percent:stats.pct}));scheduleCloudSave()}));
+ el.querySelector(`[data-reset="${type}"]`).onclick=()=>{if(confirm("모든 체크를 해제할까요?")){removeStored(storageKey(type));syncChecklist(type);trackEvent("packing_reset",tripAnalytics(findTrip(type),{completion_percent:0}));scheduleCloudSave()}};
+ el.querySelector(`[data-restore="${type}"]`).onclick=()=>{if(confirm("추가·변경한 항목을 지우고 기본 준비물 목록으로 되돌릴까요?")){removeStored(checklistDefinitionKey(type));rerenderChecklist(type);scheduleCloudSave()}};
+ el.querySelector(`[data-packing-home="${type}"]`).onclick=()=>{renderDashboard();scheduleCloudSave();go("home")};
+ el.querySelectorAll("[data-add-check]").forEach(button=>button.onclick=()=>{const next=getChecklistDefinition(type),id=`${type}-custom-${crypto.randomUUID()}`;next[Number(button.dataset.addCheck)].items.push({id,label:"새 준비물"});saveChecklistDefinition(type,next);document.querySelectorAll(`[data-label-check="${id}"]`).forEach(input=>{input.focus();input.select()})});
+ el.querySelectorAll("[data-label-check]").forEach(input=>{input.oninput=()=>{const label=input.value.slice(0,80),next=getChecklistDefinition(type),group=next[Number(input.dataset.groupIndex)],item=group.items.find(value=>value.id===input.dataset.labelCheck);if(!item)return;item.label=label;writeJSON(checklistDefinitionKey(type),next);input.parentElement.querySelector('[data-check]')?.setAttribute("aria-label",label||"새 준비물");scheduleCloudSave()};input.onblur=()=>{if(!input.value.trim()){input.value="새 준비물";input.oninput()}}});
+ el.querySelectorAll("[data-delete-check]").forEach(button=>button.onclick=()=>{if(!confirm("이 준비물을 목록에서 삭제할까요?"))return;const next=getChecklistDefinition(type),group=next[Number(button.dataset.groupIndex)];group.items=group.items.filter(item=>item.id!==button.dataset.deleteCheck);saveChecklistDefinition(type,next)});
+ updateProgress(type);
+}
+function syncChecklist(type){
+ const saved=getSaved(type);
+ document.querySelectorAll(`[data-check="${type}"]`).forEach(i=>i.checked=Boolean(saved[i.dataset.id]));
+ updateProgress(type);
+}
+function updateProgress(type){
+ const first=document.querySelector(`[data-checklist="${type}"]`)||document.getElementById("packing-master");
+ const all=first?[...first.querySelectorAll(`[data-check="${type}"]`)]:[], checked=all.filter(x=>x.checked).length;
+ document.querySelectorAll(`[data-checked="${type}"]`).forEach(x=>x.textContent=checked);
+ document.querySelectorAll(`[data-total="${type}"]`).forEach(x=>x.textContent=all.length);
+ const pct=all.length?Math.round(checked/all.length*100):0;
+ document.querySelectorAll(`[data-progress="${type}"]`).forEach(x=>x.style.width=pct+"%");
+ document.querySelectorAll(`[data-count^="${type}-"]`).forEach(x=>{const g=x.dataset.count.split("-").pop(),ga=all.filter(i=>i.dataset.group===g);x.textContent=`${ga.filter(i=>i.checked).length} / ${ga.length}`});
+ const hp=document.getElementById(`${type}-home-progress`), hb=document.getElementById(`${type}-home-bar`);if(hp)hp.textContent=pct+"%";if(hb)hb.style.width=pct+"%";
+ if(document.getElementById("nearest-trip-card"))renderDashboard();
+}
+renderChecklist("fuji",'[data-checklist="fuji"]');renderChecklist("sonic",'[data-checklist="sonic"]');
+let masterType="fuji";function renderPackingTabs(){const trips=allTrips().filter(trip=>trip.enabledFeatures.packing!==false),tabs=document.getElementById("packing-tabs"),root=document.getElementById("packing-master");if(!trips.length){tabs.innerHTML="";root.innerHTML='<div class="card empty">짐싸기를 사용할 여행이 없습니다.</div>';return}if(!trips.some(trip=>trip.id===masterType))masterType=trips[0].id;tabs.innerHTML=trips.map(trip=>`<button class="tab ${trip.id===masterType?"active":""}" data-pack="${trip.id}">${trip.icon||"🎪"} ${escapeHTML(trip.title)}</button>`).join("");renderChecklist(masterType,root);tabs.querySelectorAll("[data-pack]").forEach(button=>button.onclick=()=>{masterType=button.dataset.pack;renderPackingTabs()})}renderPackingTabs();
+const APP_ICON_PATHS={house:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/>',luggage:'<path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><rect x="5" y="7" width="14" height="14" rx="2"/><path d="M9 11v6M15 11v6M8 21v1M16 21v1"/>',wallet:'<path d="M4 6a2 2 0 0 1 2-2h12v4H6a2 2 0 0 0 0 4h14v8H6a2 2 0 0 1-2-2Z"/><path d="M16 12v4h4M17.5 14h.01"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>','map-pinned':'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 12v9"/><circle cx="15" cy="7.5" r="2.5"/><path d="M15 10c-2 2-3 3.5-3 3.5"/>',receipt:'<path d="M6 3h12v19l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6M9 16h4"/>'};
+function appIcon(name){return`<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true">${APP_ICON_PATHS[name]||APP_ICON_PATHS.house}</svg>`}
+function renderTravelToolIcons(){document.querySelectorAll("[data-tool-icon]").forEach(node=>node.innerHTML=appIcon(node.dataset.toolIcon))}
+function renderBottomNav(){const nav=document.getElementById("bottom-nav"),items=[{id:"home",icon:"house",label:"홈"},{id:"trips",icon:"map",label:"여행"},{id:"packing",icon:"luggage",label:"짐싸기"},{id:"currency",icon:"wallet",label:"환전"},{id:"mypage",icon:"user",label:"마이"}];nav.innerHTML=items.map(item=>`<button class="nav-btn" data-go="${item.id}">${appIcon(item.icon)}${item.label}</button>`).join("");nav.querySelectorAll("[data-go]").forEach(button=>button.onclick=()=>go(button.dataset.go))}
+renderTravelToolIcons();
+function renderMyPage(){const trips=allTrips(),transports=trips.reduce((sum,trip)=>sum+tripTransport(trip.id).length,0),stays=trips.reduce((sum,trip)=>sum+tripStays(trip.id).length,0),packing=trips.reduce((sum,trip)=>{const stats=packingStats(trip.id);return{checked:sum.checked+stats.checked,total:sum.total+stats.total}},{checked:0,total:0}),signedIn=Boolean(cloudUser&&!cloudUser.is_anonymous);document.getElementById("mypage-auth-state").textContent=signedIn?"로그인됨":"로그아웃";document.getElementById("mypage-email").textContent=signedIn?(cloudUser.email||"연결됨"):"–";document.getElementById("mypage-last-sync").textContent=formatLastSync(readJSON(LAST_SYNC_KEY,null));document.getElementById("mypage-trip-count").textContent=`${trips.length}개`;document.getElementById("mypage-past-count").textContent=`${pastFestivalRecords().length}개`;document.getElementById("mypage-transport-count").textContent=`${transports}개`;document.getElementById("mypage-stay-count").textContent=`${stays}개`;document.getElementById("mypage-packing-count").textContent=`${packing.checked} / ${packing.total}개`;document.getElementById("mypage-storage-note").textContent=signedIn?"이 브라우저와 로그인한 기기에 동기화됩니다.":"현재 브라우저에만 저장됩니다. 다른 기기에서도 보려면 로그인해 주세요.";document.getElementById("mypage-sync-now").classList.toggle("hidden",!signedIn)}
+document.getElementById("restore-default-trips").onclick=()=>{if(confirm("후지록과 섬머소닉 도쿄를 여행 목록에 다시 표시할까요?")){const restored=hiddenDefaultTrips();removeStored(HIDDEN_DEFAULT_TRIPS_KEY);restored.forEach(id=>trackEvent("trip_restored",tripAnalytics(TRIP_DEFINITIONS.find(trip=>trip.id===id),{source:"mypage"})));renderPackingTabs();renderDashboard();scheduleCloudSave()}};document.getElementById("mypage-open-sync").onclick=openSyncPanel;document.getElementById("mypage-sync-now").onclick=initialCloudSync;document.getElementById("mypage-reset-data").onclick=openResetData;renderBottomNav();
+initHomeLayout();dashboardReady=true;renderDashboard();
+
+const TRIP_TAB_LABELS={overview:"개요",itinerary:"일정",transport:"교통",stay:"숙소",packing:"짐싸기",budget:"비용"};
+const legacyTripPanels={};
+["fuji-flight","fuji-hotel","fuji-packing"].forEach(id=>{const panel=document.getElementById(id),anchor=document.createComment(`${id}-home`);panel.parentNode.insertBefore(anchor,panel);legacyTripPanels[id]={panel,anchor}});
+let currentTrip=null,currentTripTab="overview";
+function restoreLegacyTripPanels(){Object.values(legacyTripPanels).forEach(({panel,anchor})=>{if(panel.parentNode!==anchor.parentNode)anchor.parentNode.insertBefore(panel,anchor.nextSibling);panel.classList.remove("active")})}
+function mountLegacyPanel(id,target){const entry=legacyTripPanels[id];if(!entry)return;target.appendChild(entry.panel);entry.panel.classList.add("active")}
+function showPage(page){document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===`page-${page}`));document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",page==="trip"?b.dataset.go==="trips":b.dataset.go===page));window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}
+function genericEventForm(trip,type){const isTransport=type==="transport";return`<article class="card"><h2>${isTransport?"교통 일정 추가":"일정 추가"}</h2><p class="sub">${escapeHTML(trip.title)}에만 저장됩니다.</p><form class="trip-form-section" data-trip-event-form="${type}"><label>${isTransport?"이동수단":"종류"}<select name="kind">${isTransport?'<option value="flight">비행기</option><option value="train">열차</option><option value="car">자동차</option><option value="bus">버스</option><option value="other">기타</option>':'<option value="festival">페스티벌</option><option value="activity">활동</option><option value="meal">식사</option><option value="other">기타</option>'}</select></label><label>일정 이름<input name="title" required maxlength="80" placeholder="${isTransport?"공항에서 숙소 이동":"체크인 또는 공연 관람"}"></label>${isTransport?'<label>출발지<input name="from_label" maxlength="80"></label><label>도착지<input name="to_label" maxlength="80"></label>':'<label class="wide">장소<input name="location" maxlength="100"></label>'}<label>시작 일시<input name="start_at" type="datetime-local" required></label><label>종료 일시<input name="end_at" type="datetime-local"></label><label class="wide">메모<input name="note" maxlength="200"></label><div class="wide"><button class="primary-btn" type="submit">저장</button></div></form></article><article class="card" style="margin-top:14px"><h2>저장된 ${isTransport?"교통":"일정"}</h2><div data-trip-event-list="${type}"></div></article>`}
+function renderTripEventList(type){const root=document.querySelector(`[data-trip-event-list="${type}"]`);if(!root||!currentTrip)return;const items=tripEvents(currentTrip.id).filter(item=>item.type===type).sort((a,b)=>String(a.start_at).localeCompare(String(b.start_at)));root.innerHTML=items.length?items.map(item=>`<div class="itinerary-item"><h3>${escapeHTML(item.title)}</h3><p>${formatStayDate(item.start_at)}${item.end_at?` → ${formatStayDate(item.end_at)}`:""}${item.from_label||item.to_label?`<br>${escapeHTML(item.from_label||"미정")} → ${escapeHTML(item.to_label||"미정")}`:""}${item.location?`<br>${escapeHTML(item.location)}`:""}${item.note?`<br>${escapeHTML(item.note)}`:""}</p><div class="button-row"><button class="secondary-btn" data-delete-trip-event="${item.id}">삭제</button></div></div>`).join(""):'<div class="trip-empty">아직 저장된 항목이 없습니다.</div>';root.querySelectorAll("[data-delete-trip-event]").forEach(button=>button.onclick=()=>{writeJSON(tripEventsKey(currentTrip.id),tripEvents(currentTrip.id).filter(item=>item.id!==button.dataset.deleteTripEvent));renderTripPanel(type);renderDashboard();scheduleCloudSave()})}
+function bindTripEventForm(type){const form=document.querySelector(`[data-trip-event-form="${type}"]`);if(!form)return;form.onsubmit=event=>{event.preventDefault();const item=Object.fromEntries(new FormData(form).entries());item.id=crypto.randomUUID();item.type=type;writeJSON(tripEventsKey(currentTrip.id),[...tripEvents(currentTrip.id),item]);form.reset();renderTripPanel(type);renderDashboard();scheduleCloudSave();trackEvent("trip_item_saved",{trip_id:currentTrip.id,section:type})};renderTripEventList(type)}
+function stayNights(checkIn,checkOut){const start=Date.parse(`${stayDateValue(checkIn)}T00:00:00Z`),end=Date.parse(`${stayDateValue(checkOut)}T00:00:00Z`);return Number.isFinite(start)&&Number.isFinite(end)&&end>=start?Math.round((end-start)/86400000):0}
+function stayShortDate(value){const date=stayDateValue(value);if(!date)return"미정";const[,month,day]=date.split("-");return`${Number(month)}/${Number(day)}`}
+function stayPersonId(name){return`person-${[...String(name)].map(char=>char.codePointAt(0).toString(36)).join("-")}`}
+function currentStayTravelerName(){return String(cloudUser?.user_metadata?.full_name||personalItineraries().find(item=>item.traveler_name)?.traveler_name||"나").trim().slice(0,30)}
+function stayParticipantNames(tripId){const names=[];if(activeGroupTripId===tripId||tripId==="fuji")names.push(...FUJI_TRAVELERS);names.push(...personalItineraries().map(item=>item.traveler_name));tripStays(tripId).forEach(stay=>stay.members.forEach(member=>names.push(member.name)));names.push(currentStayTravelerName());return[...new Set(names.map(name=>String(name||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"ko"))}
+function canManageStay(stay){if(isGuestAccess())return false;const owner=cloudUser?.id||"local";return!stay.ownerId||stay.ownerId==="local"||stay.ownerId===owner||(stay.shared&&activeGroupOwnerId===owner)}
+function writeTripStays(tripId,items){writeJSON(tripId==="fuji"?PERSONAL_STAY_KEY:tripStaysKey(tripId),items);scheduleCloudSave()}
+const SHARED_STAY_PREFIX="festival-passport-stay:";
+function parseSharedStay(row){try{if(!String(row.note||"").startsWith(SHARED_STAY_PREFIX))return null;const data=JSON.parse(String(row.note).slice(SHARED_STAY_PREFIX.length)),stay=normalizeStay({...data,id:row.id,tripId:row.trip_id||activeGroupTripId,ownerId:row.owner_id,checkIn:data.checkIn||stayDateValue(row.depart_at),checkOut:data.checkOut||stayDateValue(row.arrive_at)},0,row.trip_id||activeGroupTripId);if(!stay.totalPrice&&stay.paymentStatus==="unpaid")stay.paymentStatus="unknown";stay.members.forEach(member=>{if(!member.amount&&member.paymentStatus==="unpaid")member.paymentStatus="unknown"});return{...stay,shared:true,groupId:row.group_id}}catch{return null}}
+function sharedStayPayload(item){const stored={...item};delete stored.shared;delete stored.groupId;return{group_id:activeGroupId,owner_id:cloudUser.id,traveler_name:memberSummary(item.members).slice(0,30),kind:"other",depart_at:`${item.checkIn}T00:00:00.000Z`,arrive_at:`${item.checkOut}T00:00:00.000Z`,from_label:item.name,to_label:item.address||item.roomType||"숙소",note:SHARED_STAY_PREFIX+JSON.stringify(stored),...(activeGroupTripId!=="fuji"?{trip_id:activeGroupTripId}:{})}}
+async function saveSharedStay(item,existing){await ensureGroupUser();if(!activeGroupId)throw new Error("그룹코드를 먼저 입력해 주세요.");const payload=sharedStayPayload(item),query=existing?cloudClient.from("travel_itineraries").update(payload).eq("id",existing.id):cloudClient.from("travel_itineraries").insert(payload),{error}=await query;if(error)throw error;await loadActiveGroup()}
+async function deleteSharedStay(item){const{error}=await cloudClient.from("travel_itineraries").delete().eq("id",item.id);if(error)throw error;await loadActiveGroup()}
+async function joinStayGroup(){const input=document.getElementById("stay-group-code-input"),status=document.getElementById("stay-group-status"),code=input?.value.trim();if(!code){status.textContent="그룹코드를 입력해 주세요.";return}try{status.textContent="그룹 숙소를 불러오는 중입니다.";await ensureGroupUser();const{data,error}=await cloudClient.rpc("join_travel_group",{p_code:code});if(error)throw error;activeGroupId=typeof data==="string"?data:data?.group_id;sessionStorage.setItem(ACTIVE_GROUP_KEY,activeGroupId);await loadActiveGroup();if(activeGroupTripId!==currentTrip.id){status.textContent="이 그룹코드는 다른 여행에 연결되어 있습니다.";return}renderTripPanel("stay",false)}catch(error){status.textContent=error.message.includes("invalid_group_code")?"그룹코드를 확인해 주세요.":"그룹 숙소를 불러오지 못했습니다."}}
+function genericStayPanel(){const connected=activeGroupId&&activeGroupTripId===currentTrip.id;return`<article class="card"><div class="stay-panel-head"><div><h2>숙박 계획</h2><p class="sub">개인 숙소와 일행이 함께 머무는 그룹 숙소를 한곳에서 관리합니다.</p></div><button type="button" class="primary-btn" id="open-stay-form">＋ 숙소 추가</button></div><div class="group-stay-access" style="margin-top:16px"><b>그룹 숙소 불러오기</b>${connected?`<p class="sub">${escapeHTML(activeGroupName)} 그룹과 연결됨 · 같은 그룹코드의 숙소를 함께 봅니다.</p>`:`<p class="sub">교통 일정과 동일한 그룹코드를 입력하면 일행의 숙소를 불러옵니다.</p><div class="auth-row"><input id="stay-group-code-input" autocomplete="off" autocapitalize="characters" maxlength="32" placeholder="그룹코드"><button type="button" class="secondary-btn" id="join-stay-group">코드로 불러오기</button></div>`}<p class="status-note" id="stay-group-status"></p></div><form class="trip-form-section hidden" id="trip-stay-form" style="margin-top:16px"><fieldset class="wide"><legend>숙소 유형</legend><div class="stay-type-choice"><label><input type="radio" name="type" value="personal" checked>개인</label><label><input type="radio" name="type" value="group">그룹</label></div></fieldset><label>숙박 형태<select name="kind"><option value="lodging">숙소</option><option value="camping">캠핑</option></select></label><label>숙소명<input name="name" required maxlength="80"></label><label>체크인<input name="checkIn" type="date" required></label><label>체크아웃<input name="checkOut" type="date" required></label><label data-personal-stay-name>투숙자 이름<input name="travelerName" maxlength="30" placeholder="나"></label><div class="wide hidden" id="stay-group-members"><b>참여 인원</b><p class="sub">추가할 사람의 이름을 직접 입력한 뒤 각자의 숙박 기간을 조정하세요.</p><div class="auth-row"><input id="new-stay-person-name" maxlength="30" placeholder="추가할 사람 이름"><button type="button" class="secondary-btn" id="add-stay-person">＋ 사람 추가</button></div><div class="stay-member-editor" id="stay-member-editor"></div></div><details class="wide stay-additional"><summary>추가 정보</summary><div class="trip-form-section" style="margin-top:12px"><label>객실 유형<input name="roomType" maxlength="80"></label><label>주소<input name="address" maxlength="160"></label><label>대표 예약자<input name="reservationName" maxlength="50"></label><label>예약 플랫폼<input name="bookingPlatform" maxlength="60"></label><label>예약번호<input name="bookingNumber" maxlength="80"></label><label>총 숙박비<input name="totalPrice" type="number" min="0" step="1"></label><label>통화<select name="currency"><option>JPY</option><option>KRW</option><option>USD</option><option>EUR</option><option>GBP</option></select></label><label>결제 상태<select name="paymentStatus"><option value="unknown">미정</option><option value="unpaid">미결제</option><option value="partial">일부 결제</option><option value="paid">결제 완료</option></select></label><label class="wide">메모<textarea name="memo" maxlength="500" rows="3"></textarea></label></div></details><p class="stay-form-error wide" id="stay-form-error" role="alert"></p><div class="planner-actions wide"><button class="primary-btn" type="submit">저장</button><button class="secondary-btn" type="button" id="cancel-stay-form">취소</button></div></form><div id="trip-stay-list" style="margin-top:14px"></div></article>`}
+function memberSummary(members){if(!members.length)return"참여자 미등록";return members.length===1?members[0].name:`${members[0].name} 외 ${members.length-1}명`}
+function stayCardHTML(item){const nights=stayNights(item.checkIn,item.checkOut),manage=canManageStay(item),current=item.members.find(member=>member.name===currentStayTravelerName()),personalName=item.members[0]?.name||"나",paymentLabels={unpaid:"미결제",partial:"일부 결제",paid:"결제 완료"},memberRows=item.members.map(member=>{const payment=[];if(Number(member.amount)>0)payment.push(`${Number(member.amount).toLocaleString()} ${escapeHTML(item.currency)}`);if(member.paymentStatus!=="unknown"&&(Number(member.amount)>0||member.paymentStatus!=="unpaid"))payment.push(paymentLabels[member.paymentStatus]);return`<div class="info-row"><dt>${escapeHTML(member.name)}</dt><dd>${stayShortDate(member.checkIn)} → ${stayShortDate(member.checkOut)}${payment.length?` · ${payment.join(" · ")}`:""}</dd></div>`}).join("");return`<article class="itinerary-item stay-card"><div class="stay-card-head"><div><span class="stay-badge ${item.type}">${item.type==="group"?`그룹${item.shared?" · 공유":""}`:"개인"}</span><h3>${escapeHTML(item.name)}</h3></div><span class="sub">${nights}박</span></div><p class="stay-card-meta">${stayShortDate(item.checkIn)}~${stayShortDate(item.checkOut)} · ${nights}박<br>${item.type==="group"?`${item.members.length}명 · ${escapeHTML(memberSummary(item.members))}`:escapeHTML(personalName)}${current?`<br>내 투숙 기간 ${stayShortDate(current.checkIn)} → ${stayShortDate(current.checkOut)}`:""}</p><details class="stay-details"><summary>상세 보기</summary><dl class="info-list">${memberRows}${item.roomType?`<div class="info-row"><dt>객실</dt><dd>${escapeHTML(item.roomType)}</dd></div>`:""}${item.address?`<div class="info-row"><dt>주소</dt><dd>${escapeHTML(item.address)}</dd></div>`:""}${manage&&item.reservationName?`<div class="info-row"><dt>대표 예약자</dt><dd>${escapeHTML(item.reservationName)}</dd></div>`:""}${manage&&item.bookingPlatform?`<div class="info-row"><dt>예약 플랫폼</dt><dd>${escapeHTML(item.bookingPlatform)}</dd></div>`:""}${manage&&item.bookingNumber?`<div class="info-row"><dt>예약번호</dt><dd>${escapeHTML(item.bookingNumber)}</dd></div>`:""}${manage&&item.memo?`<div class="info-row"><dt>메모</dt><dd>${escapeHTML(item.memo)}</dd></div>`:""}</dl></details>${manage?`<div class="stay-card-actions"><button class="secondary-btn" data-edit-trip-stay="${item.id}">수정</button><button class="secondary-btn" data-delete-trip-stay="${item.id}">삭제</button></div>`:""}</article>`}
+function collectStayMemberRows(){return[...document.querySelectorAll("[data-stay-member-row]")].map(row=>normalizeStayMember({personId:row.dataset.personId,name:row.dataset.personName,checkIn:row.querySelector('[name="memberCheckIn"]')?.value,checkOut:row.querySelector('[name="memberCheckOut"]')?.value,amount:row.querySelector('[name="memberAmount"]')?.value,paymentStatus:row.querySelector('[name="memberPaymentStatus"]')?.value}))}
+function renderStayMemberEditor(seed=[],names=null){const form=document.getElementById("trip-stay-form"),root=document.getElementById("stay-member-editor");if(!form||!root)return;const existing=new Map([...seed,...collectStayMemberRows()].map(member=>[member.name,member])),memberNames=names||[...existing.keys()],checkIn=form.elements.checkIn.value,checkOut=form.elements.checkOut.value;root.innerHTML=memberNames.map(name=>{const member=existing.get(name)||normalizeStayMember({personId:stayPersonId(name),name,checkIn,checkOut});return`<div class="stay-member-row" data-stay-member-row data-person-id="${escapeHTML(member.personId)}" data-person-name="${escapeHTML(name)}"><div class="stay-member-name"><strong>${escapeHTML(name)}</strong><button type="button" data-remove-stay-member="${escapeHTML(name)}">삭제</button></div><label>체크인<input name="memberCheckIn" type="date" value="${member.checkIn||checkIn}" required></label><label>체크아웃<input name="memberCheckOut" type="date" value="${member.checkOut||checkOut}" required></label><label>개인 금액<input name="memberAmount" type="number" min="0" step="1" value="${member.amount||""}"></label><label>결제 상태<select name="memberPaymentStatus"><option value="unknown" ${member.paymentStatus==="unknown"?"selected":""}>미정</option><option value="unpaid" ${member.paymentStatus==="unpaid"?"selected":""}>미결제</option><option value="partial" ${member.paymentStatus==="partial"?"selected":""}>일부 결제</option><option value="paid" ${member.paymentStatus==="paid"?"selected":""}>결제 완료</option></select></label></div>`}).join("");root.querySelectorAll("[data-remove-stay-member]").forEach(button=>button.onclick=()=>{const remaining=collectStayMemberRows().filter(member=>member.name!==button.dataset.removeStayMember);renderStayMemberEditor(remaining,remaining.map(member=>member.name))})}
+function configureStayType(seed=[]){const form=document.getElementById("trip-stay-form"),group=form?.elements.type.value==="group";document.getElementById("stay-group-members")?.classList.toggle("hidden",!group);document.querySelector("[data-personal-stay-name]")?.classList.toggle("hidden",group);if(group&&!collectStayMemberRows().length)renderStayMemberEditor(seed,seed.map(member=>member.name))}
+function addStayPerson(seed=[]){const input=document.getElementById("new-stay-person-name"),name=input?.value.trim().slice(0,30);if(!name)return;const members=collectStayMemberRows(),existing=members.find(member=>member.name===name);if(!existing)members.push(normalizeStayMember({personId:stayPersonId(name),name,checkIn:document.getElementById("trip-stay-form").elements.checkIn.value,checkOut:document.getElementById("trip-stay-form").elements.checkOut.value}));input.value="";renderStayMemberEditor([...seed.filter(member=>member.name!==name),...members],members.map(member=>member.name));input.focus()}
+function openStayForm(item=null){const form=document.getElementById("trip-stay-form");if(!form)return;form.classList.remove("hidden");form.reset();form.dataset.editId=item?.id||"";document.getElementById("stay-form-error").textContent="";const value=item||normalizeStay({tripId:currentTrip.id,type:"personal",currency:"JPY"});form.querySelector('input[name="type"][value="personal"]').disabled=Boolean(item?.shared);["type","kind","name","checkIn","checkOut","roomType","address","reservationName","bookingPlatform","bookingNumber","totalPrice","currency","paymentStatus","memo"].forEach(key=>{if(form.elements[key])form.elements[key].value=value[key]??""});form.elements.travelerName.value=item?.members[0]?.name||currentStayTravelerName();document.getElementById("add-stay-person").onclick=()=>addStayPerson(value.members);document.getElementById("new-stay-person-name").onkeydown=event=>{if(event.key==="Enter"){event.preventDefault();addStayPerson(value.members)}};form.querySelectorAll('[name="type"]').forEach(input=>input.onchange=()=>configureStayType(value.members));form.elements.checkIn.onchange=form.elements.checkOut.onchange=()=>{const members=collectStayMemberRows();renderStayMemberEditor(members,members.map(member=>member.name))};configureStayType(value.members);form.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});form.elements.name.focus();trackEvent("stay_create_open",{trip_id:currentTrip.id,stay_type:value.type,source:item?"edit":"stay"})}
+function validateStay(item){if(!item.name)return"숙소명을 입력해 주세요.";if(!item.checkIn||!item.checkOut)return"체크인과 체크아웃 날짜를 입력해 주세요.";if(item.checkIn>item.checkOut)return"체크인은 체크아웃보다 늦을 수 없습니다.";if(item.type==="group"&&!item.members.length)return"참여 인원을 한 명 이상 선택해 주세요.";for(const member of item.members){if(!member.checkIn||!member.checkOut)return`${member.name}의 투숙 기간을 입력해 주세요.`;if(member.checkIn>member.checkOut)return`${member.name}의 체크인은 체크아웃보다 늦을 수 없습니다.`;if(member.checkIn<item.checkIn||member.checkOut>item.checkOut)return`${member.name}의 투숙 기간은 그룹 전체 숙박 기간 안이어야 합니다.`}return""}
+function groupStayDisplayHTML(items){if(!items.length)return"";const names=[...new Set(items.flatMap(item=>item.members.map(member=>member.name)))].sort((a,b)=>a.localeCompare(b,"ko"));if(!names.includes(selectedGroupStayMember))selectedGroupStayMember=names[0]||"";const personItems=items.filter(item=>item.members.some(member=>member.name===selectedGroupStayMember)),stayTimeline=items.flatMap(item=>item.members.map(member=>({type:"stay",start:member.checkIn,item,member}))),timeline=[...stayTimeline,{type:"festival",start:currentTrip.eventStart}].sort((a,b)=>a.start.localeCompare(b.start)||(a.member?.name||"").localeCompare(b.member?.name||"","ko"));return`<section style="margin-top:18px"><div class="section-title"><h3>그룹 숙소 일정</h3><p>${items.length}개 숙소 · ${names.length}명</p></div><div class="view-switch" role="group" aria-label="그룹 숙소 보기 방식"><button class="${groupStayView==="person"?"active":""}" data-group-stay-view="person">이름순 보기</button><button class="${groupStayView==="timeline"?"active":""}" data-group-stay-view="timeline">시간순 보기</button></div>${groupStayView==="person"?`<div class="traveler-list" aria-label="숙소 일행 선택">${names.map(name=>`<button class="traveler-btn ${name===selectedGroupStayMember?"active":""}" data-group-stay-person="${escapeHTML(name)}">${escapeHTML(name)}</button>`).join("")}</div><div>${personItems.map(stayCardHTML).join("")}</div>`:`<div class="group-stay-timeline">${timeline.map(entry=>entry.type==="festival"?`<div class="flight-timeline-item festival"><time>${shortDateRange(currentTrip.eventStart,currentTrip.eventEnd)}</time><h3>${escapeHTML(currentTrip.title)} 행사 기간</h3><p>${escapeHTML(currentTrip.location)} · ${stayNights(currentTrip.eventStart,new Date(Date.parse(currentTrip.eventEnd)+86400000).toISOString().slice(0,10))}일간 진행</p></div>`:`<div class="flight-timeline-item"><time>${stayShortDate(entry.member.checkIn)} → ${stayShortDate(entry.member.checkOut)}</time><h3>${escapeHTML(entry.member.name)} · ${escapeHTML(entry.item.name)}</h3><p>${escapeHTML(entry.item.roomType||(entry.item.kind==="camping"?"캠핑":"숙소"))} · ${stayNights(entry.member.checkIn,entry.member.checkOut)}박</p></div>`).join("")}</div>`}</section>`}
+function renderGenericStays(){
+ const root=document.getElementById("trip-stay-list"),localItems=tripStays(currentTrip.id),sharedItems=activeGroupId&&activeGroupTripId===currentTrip.id?activeGroupStays:[],items=[...localItems,...sharedItems];
+ root.innerHTML=items.length?`${localItems.map(stayCardHTML).join("")}${groupStayDisplayHTML(sharedItems)}`:'<div class="trip-empty">아직 저장된 숙박 계획이 없습니다.</div>';
+ document.getElementById("join-stay-group")?.addEventListener("click",joinStayGroup);
+ document.getElementById("open-stay-form").onclick=()=>openStayForm();
+ document.getElementById("cancel-stay-form").onclick=()=>document.getElementById("trip-stay-form").classList.add("hidden");
+ root.querySelectorAll("[data-group-stay-view]").forEach(button=>button.onclick=()=>{groupStayView=button.dataset.groupStayView;renderTripPanel("stay",false)});root.querySelectorAll("[data-group-stay-person]").forEach(button=>button.onclick=()=>{selectedGroupStayMember=button.dataset.groupStayPerson;renderTripPanel("stay",false)});
+ root.querySelectorAll("[data-edit-trip-stay]").forEach(button=>button.onclick=()=>openStayForm(items.find(item=>item.id===button.dataset.editTripStay)));
+ root.querySelectorAll("[data-delete-trip-stay]").forEach(button=>button.onclick=async()=>{const item=items.find(value=>value.id===button.dataset.deleteTripStay);if(!item)return;const message=item.type==="group"?"이 그룹 숙소를 삭제할까요?\n참여자들의 숙소 일정에서도 함께 사라집니다.":"이 숙소를 삭제할까요?";if(!confirm(message))return;try{if(item.shared)await deleteSharedStay(item);else writeTripStays(currentTrip.id,localItems.filter(value=>value.id!==item.id));trackEvent("stay_deleted",{trip_id:currentTrip.id,stay_type:item.type,member_count:item.members.length,nights:stayNights(item.checkIn,item.checkOut),source:item.shared?"group_code":"stay"});renderTripPanel("stay",false);renderDashboard()}catch{alert("그룹 숙소를 삭제하지 못했습니다.")}});
+ document.getElementById("trip-stay-form").onsubmit=async event=>{event.preventDefault();const form=event.currentTarget,submit=form.querySelector('[type="submit"]'),source=Object.fromEntries(new FormData(form).entries()),existing=items.find(item=>item.id===form.dataset.editId),now=new Date().toISOString(),type=source.type==="group"?"group":"personal",members=type==="group"?collectStayMemberRows():[normalizeStayMember({personId:stayPersonId(source.travelerName||"나"),name:source.travelerName||"나",checkIn:source.checkIn,checkOut:source.checkOut})],item=normalizeStay({...source,id:existing?.id||crypto.randomUUID(),tripId:currentTrip.id,type,members,ownerId:existing?.ownerId||cloudUser?.id||"local",createdAt:existing?.createdAt||now,updatedAt:now},0,currentTrip.id),error=validateStay(item);if(error){document.getElementById("stay-form-error").textContent=error;return}const beforeMembers=new Set(existing?.members.map(member=>member.personId)||[]),afterMembers=new Set(item.members.map(member=>member.personId)),shareWithGroup=type==="group"&&activeGroupId&&activeGroupTripId===currentTrip.id;submit.disabled=true;try{if(existing?.shared||(!existing&&shareWithGroup))await saveSharedStay(item,existing);else{const next=existing?localItems.map(value=>value.id===item.id?item:value):[...localItems,item];writeTripStays(currentTrip.id,next)}[...afterMembers].filter(id=>!beforeMembers.has(id)).forEach(()=>trackEvent("group_stay_member_added",{trip_id:currentTrip.id,stay_type:type,member_count:item.members.length,nights:stayNights(item.checkIn,item.checkOut),source:shareWithGroup?"group_code":"stay"}));[...beforeMembers].filter(id=>!afterMembers.has(id)).forEach(()=>trackEvent("group_stay_member_removed",{trip_id:currentTrip.id,stay_type:type,member_count:item.members.length,nights:stayNights(item.checkIn,item.checkOut),source:shareWithGroup?"group_code":"stay"}));trackEvent(existing?"stay_updated":"stay_created",{trip_id:currentTrip.id,stay_type:type,member_count:item.members.length,nights:stayNights(item.checkIn,item.checkOut),source:shareWithGroup?"group_code":"stay"});renderTripPanel("stay",false);renderDashboard()}catch{document.getElementById("stay-form-error").textContent="그룹 숙소를 저장하지 못했습니다. 그룹코드 연결을 다시 확인해 주세요."}finally{submit.disabled=false}}
+}
+function genericBudgetPanel(){const items=tripBudget(currentTrip.id),total=items.reduce((sum,item)=>sum+Number(item.amount||0),0);return`<div class="trip-summary-grid"><article class="card"><span class="sub">등록 항목</span><b>${items.length}개</b></article><article class="card"><span class="sub">예상 합계</span><b>${total.toLocaleString()}원</b></article><article class="card"><span class="sub">여행</span><b style="font-size:15px">${escapeHTML(currentTrip.title)}</b></article></div><article class="card"><h2>여행 예산</h2><form class="trip-form-section" id="trip-budget-form"><label>분류<select name="category"><option>티켓</option><option>교통</option><option>숙소</option><option>식비</option><option>기타</option></select></label><label>항목<input name="title" required maxlength="80"></label><label>금액<input name="amount" type="number" min="0" required></label><label>통화<select name="currency"><option value="KRW">KRW</option><option value="JPY">JPY</option><option value="USD">USD</option></select></label><div class="wide"><button class="primary-btn">저장</button></div></form><div id="trip-budget-list">${items.length?items.map(item=>`<div class="itinerary-item"><h3>${escapeHTML(item.category)} · ${escapeHTML(item.title)}</h3><p>${Number(item.amount).toLocaleString()} ${escapeHTML(item.currency)}</p><button class="secondary-btn" data-delete-trip-budget="${item.id}">삭제</button></div>`).join(""):'<div class="trip-empty">아직 등록한 예산이 없습니다.</div>'}</div></article>`}
+function bindGenericBudget(){document.getElementById("trip-budget-form").onsubmit=event=>{event.preventDefault();const item=Object.fromEntries(new FormData(event.currentTarget).entries());item.id=crypto.randomUUID();writeJSON(tripBudgetKey(currentTrip.id),[...tripBudget(currentTrip.id),item]);trackEvent("budget_item_added",tripAnalytics(currentTrip,{feature:item.category}));renderTripPanel("budget");scheduleCloudSave()};document.querySelectorAll("[data-delete-trip-budget]").forEach(button=>button.onclick=()=>{writeJSON(tripBudgetKey(currentTrip.id),tripBudget(currentTrip.id).filter(item=>item.id!==button.dataset.deleteTripBudget));trackEvent("budget_item_deleted",tripAnalytics(currentTrip,{section:"budget"}));renderTripPanel("budget");scheduleCloudSave()})}
+function renderTripOverview(){const t=currentTrip,query=encodeURIComponent(`${t.location}, ${t.city}, ${t.countryName}`),summary=readinessSummary(t.id),located=tripHasCoordinates(t);return`<div class="trip-summary-grid"><article class="card"><span class="sub">준비도</span><b>${summary.pct}%</b></article><article class="card"><span class="sub">여행 기간</span><b style="font-size:16px">${shortDateRange(t.travelStart,t.travelEnd)}</b></article><article class="card"><span class="sub">상태</span><b style="font-size:16px">${t.status==="booked"?"예약 진행":"계획 중"}</b></article></div><article class="card"><h2>행사 정보</h2><dl class="info-list"><div class="info-row"><dt>페스티벌</dt><dd>${escapeHTML(t.festivalName)}</dd></div><div class="info-row"><dt>행사 일정</dt><dd>${escapeHTML(t.eventStart)} – ${escapeHTML(t.eventEnd)}</dd></div><div class="info-row"><dt>장소</dt><dd>${escapeHTML(t.location)} · ${escapeHTML(t.city)}, ${escapeHTML(t.countryName)}</dd></div></dl></article><article class="card map-card"><h2>행사장 위치</h2><iframe class="map-frame" title="${escapeHTML(t.title)} 행사장 지도" loading="lazy" src="https://www.google.com/maps?q=${query}&amp;output=embed"></iframe><div class="map-actions"><a class="map-link primary" href="https://www.google.com/maps/search/?api=1&amp;query=${query}" target="_blank" rel="noreferrer">Google Maps</a>${t.officialUrl?`<a class="map-link" href="${escapeHTML(t.officialUrl)}" target="_blank" rel="noreferrer">공식 홈페이지</a>`:""}${t.custom&&!located?'<button class="map-link" type="button" id="resolve-trip-location">월드맵 위치 찾기</button>':""}</div>${t.custom&&!located?'<p class="sub">좌표가 없어 월드맵에는 아직 표시되지 않습니다. 위치 찾기를 누르면 장소명으로 한 번 검색해 저장합니다. © OpenStreetMap contributors</p>':""}</article>`}
+function renderTripPanel(tab,updateHistory=true){if(!currentTrip)return;restoreLegacyTripPanels();currentTripTab=TRIP_TAB_LABELS[tab]?tab:"overview";document.querySelectorAll("#trip-detail-tabs .tab").forEach(button=>button.classList.toggle("active",button.dataset.tripTab===currentTripTab));const root=document.getElementById("trip-detail-content");root.innerHTML="";if(currentTripTab==="overview"){root.innerHTML=renderTripOverview();document.getElementById("resolve-trip-location")?.addEventListener("click",resolveCurrentTripLocation)}else if(currentTripTab==="transport"&&currentTrip.id==="fuji")mountLegacyPanel("fuji-flight",root);else if(currentTripTab==="packing"){if(currentTrip.id==="fuji")mountLegacyPanel("fuji-packing",root);else{root.innerHTML='<div id="trip-packing-list"></div>';renderChecklist(currentTrip.id,document.getElementById("trip-packing-list"))}}else if(currentTripTab==="transport"){root.innerHTML=genericEventForm(currentTrip,"transport")+'<article class="card" style="margin-top:14px"><h2>그룹 여행</h2><p class="sub">이 여행의 그룹코드는 서버의 Trip Engine 마이그레이션을 적용한 뒤 사용할 수 있습니다. 기존 후지록 그룹은 그대로 유지됩니다.</p></article>';bindTripEventForm("transport")}else if(currentTripTab==="stay"){root.innerHTML=genericStayPanel();renderGenericStays()}else if(currentTripTab==="budget"){root.innerHTML=genericBudgetPanel();bindGenericBudget()}const nextHash=`#trip/${encodeURIComponent(currentTrip.id)}/${currentTripTab}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:"trip",tripId:currentTrip.id,tab:currentTripTab},"",nextHash);if(trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${currentTripTab}`))trackEvent("trip_section_view",tripAnalytics(currentTrip,{section:currentTripTab}))}
+function openTripDetail(ref,tab="overview",updateHistory=true,source="trip_list"){const trip=findTrip(ref);if(!trip)return go("home",updateHistory);currentTrip=trip;currentTripTab=TRIP_TAB_LABELS[tab]&&trip.enabledFeatures[tab]!==false?tab:"overview";writeJSON(CURRENT_TRIP_KEY,trip.id);document.getElementById("trip-detail-head").innerHTML=`<div class="festival-head ${trip.theme||"fuji"} trip-detail-head"><div class="eyebrow">${escapeHTML(trip.countryName)} · ${escapeHTML(trip.city)}</div><h1>${escapeHTML(trip.title)}</h1><div class="chips"><span class="chip">${shortDateRange(trip.eventStart,trip.eventEnd)}</span><span class="chip">${escapeHTML(trip.location)}</span><span class="chip">${ddayLabel(trip.eventStart)}</span></div><div class="trip-head-actions"><span>Travel ${shortDateRange(trip.travelStart,trip.travelEnd)}</span><button type="button" data-go-trip-home>전체 여행</button></div></div>`;const tabs=Object.keys(TRIP_TAB_LABELS).filter(key=>trip.enabledFeatures[key]!==false);document.getElementById("trip-detail-tabs").innerHTML=tabs.map(key=>`<button class="tab" data-trip-tab="${key}">${TRIP_TAB_LABELS[key]}</button>`).join("");document.querySelectorAll("[data-trip-tab]").forEach(button=>button.onclick=()=>renderTripPanel(button.dataset.tripTab));document.querySelector("[data-go-trip-home]").onclick=()=>go("trips");showPage("trip");renderTripPanel(currentTripTab,updateHistory);trackEvent("trip_open",tripAnalytics(trip,{source}))}
+
+let festivalWorldMap=null;function renderWorldMap(){const trips=allTrips(),list=document.getElementById("world-map-list"),status=document.getElementById("world-map-status"),located=trips.filter(tripHasCoordinates);document.getElementById("world-map-count").textContent=`${trips.length}개 여행 · ${new Set(trips.map(trip=>trip.countryCode)).size}개 국가`;list.innerHTML=trips.length?trips.map(trip=>{const hasCoordinates=located.includes(trip);return`<button class="world-trip" data-world-trip="${trip.id}"><span class="world-icon">${trip.icon||"🎪"}</span><span><b>${escapeHTML(trip.title)}</b><small>${escapeHTML(trip.city)} · ${escapeHTML(trip.countryName)} · ${shortDateRange(trip.eventStart,trip.eventEnd)}</small></span><span class="map-state">${hasCoordinates?"지도 표시":"도시만 등록"}</span></button>`}).join(""):'<article class="card empty">등록된 여행이 없습니다.<br><small>여행을 추가하면 이곳에 국가와 도시가 표시됩니다.</small></article>';list.querySelectorAll("[data-world-trip]").forEach(button=>button.onclick=()=>openTripDetail(button.dataset.worldTrip));if(typeof L==="undefined"){status.textContent="지도를 불러오지 못했습니다. 아래 여행 목록은 정상적으로 사용할 수 있습니다.";return}if(festivalWorldMap){festivalWorldMap.remove();festivalWorldMap=null}festivalWorldMap=L.map("festival-world-map",{worldCopyJump:true,scrollWheelZoom:false}).setView([25,20],2);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(festivalWorldMap);const bounds=[];located.forEach(trip=>{const point=[Number(trip.latitude),Number(trip.longitude)];bounds.push(point);const marker=L.marker(point).addTo(festivalWorldMap);marker.bindPopup(`<b>${escapeHTML(trip.title)}</b><br>${escapeHTML(trip.city)}, ${escapeHTML(trip.countryName)}<br><button type="button" data-map-popup-trip="${trip.id}" style="margin-top:8px">여행 상세 보기</button>`);marker.on("popupopen",()=>document.querySelector(`[data-map-popup-trip="${trip.id}"]`)?.addEventListener("click",()=>openTripDetail(trip.id),{once:true}))});if(bounds.length===1)festivalWorldMap.setView(bounds[0],6);else if(bounds.length>1)festivalWorldMap.fitBounds(bounds,{padding:[35,35],maxZoom:6});status.textContent=located.length===trips.length?"모든 여행의 행사장 위치를 표시했습니다.":`${located.length}개 여행은 지도에 표시했고, 좌표가 없는 여행은 아래 목록에 표시했습니다.`;setTimeout(()=>festivalWorldMap?.invalidateSize(),80);trackEvent("world_map_view",{section:"worldmap"})}
+
+function go(page,updateHistory=true){
+ if(["fuji","sonic"].includes(page))return openTripDetail(page,"overview",updateHistory);
+ restoreLegacyTripPanels();if(page==="mypage")renderMyPage();showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${page}`);
+}
+document.querySelectorAll("[data-go]:not(.nav-btn)").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
+function routeHash(){const route=decodeURIComponent(location.hash.replace(/^#/,""));if(route.startsWith("trip/")){const [,id,tab="overview"]=route.split("/");return openTripDetail(id,tab,false,"history")}if(["fuji","sonic"].includes(route))return findTrip(route)?openTripDetail(route,"overview",false,"legacy_route"):go("trips",false);if(["home","trips","packing","currency","worldmap","budget","mypage"].includes(route))go(route,false);else go("home",false)}
+window.addEventListener("popstate",routeHash);
+document.querySelectorAll("[data-tabs]").forEach(tabs=>tabs.querySelectorAll(".tab").forEach(btn=>btn.onclick=()=>{
+ tabs.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));btn.classList.add("active");
+ const g=tabs.dataset.tabs;document.querySelectorAll(`[data-group="${g}"]`).forEach(p=>p.classList.toggle("active",p.id===`${g}-${btn.dataset.panel}`));
+}));
+function dday(date,id){
+ const parts=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Seoul",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+ const today=Object.fromEntries(parts.map(p=>[p.type,p.value]));
+ const current=Date.UTC(Number(today.year),Number(today.month)-1,Number(today.day));
+ const [year,month,day]=date.split("-").map(Number),target=Date.UTC(year,month-1,day),n=Math.round((target-current)/86400000);
+ document.getElementById(id).textContent=n>0?`D-${n}`:n===0?"D-DAY":`D+${Math.abs(n)}`;
+}
+
+let rate=null;
+const RATE_CACHE_KEY="travel-rate";
+const HOLDINGS_KEY="travel-companion-yen-holdings";
+const CURRENCY_HOLDINGS_KEY="festival-passport-currency-holdings-v2";
+const BUDGET_KEY="travel-companion-budget";
+const EXCHANGE_SETTINGS_KEY="festival-passport-exchange-settings-v1";
+const DEFAULT_HOLDINGS={wallet:null,cash:null};
+const SUPPORTED_CURRENCIES={JPY:{name:"엔화",unit:"엔",rateUnit:100,decimals:0},USD:{name:"달러",unit:"달러",rateUnit:1,decimals:2},GBP:{name:"파운드",unit:"파운드",rateUnit:1,decimals:2},EUR:{name:"유로",unit:"유로",rateUnit:1,decimals:2}};
+function exchangeSettings(){const value=readJSON(EXCHANGE_SETTINGS_KEY,{}),code=SUPPORTED_CURRENCIES[value?.baseCurrency]?value.baseCurrency:"JPY";return{enabled:Boolean(value?.enabled),baseCurrency:code}}
+function exchangeEnabled(){return Boolean(exchangeSettings().enabled)}
+function selectedCurrency(){return exchangeSettings().baseCurrency}
+function allCurrencyHoldings(){const saved=readJSON(CURRENCY_HOLDINGS_KEY,null);if(saved&&typeof saved==="object")return saved;const legacy=readJSON(HOLDINGS_KEY,null),migrated={JPY:legacy&&typeof legacy==="object"?legacy:{...DEFAULT_HOLDINGS}};writeJSON(CURRENCY_HOLDINGS_KEY,migrated);return migrated}
+function holdingsFor(code=selectedCurrency()){const value=allCurrencyHoldings()[code];return value&&typeof value==="object"?value:{...DEFAULT_HOLDINGS}}
+function rateCache(){const saved=readJSON(RATE_CACHE_KEY,{});return saved&&Number.isFinite(Number(saved.rate))?{JPY:saved}:saved&&typeof saved==="object"?saved:{}}
+function saveExchangeSettings(enabled){const code=selectedCurrency();writeJSON(EXCHANGE_SETTINGS_KEY,{enabled,baseCurrency:code});trackEvent(enabled?"exchange_enabled":"exchange_disabled",{feature:code});updateExchangeUI();renderDashboard();scheduleCloudSave()}
+async function saveCurrencySelection(){const code=document.getElementById("exchange-currency").value;if(!SUPPORTED_CURRENCIES[code])return;const button=document.getElementById("save-exchange-currency"),status=document.getElementById("currency-change-status");button.disabled=true;button.textContent="환율 불러오는 중";status.textContent=`${SUPPORTED_CURRENCIES[code].name} 환율을 조회하고 있습니다.`;writeJSON(EXCHANGE_SETTINGS_KEY,{enabled:true,baseCurrency:code});rate=null;updateCurrencyLabels();loadHoldings();document.getElementById("exchange-section-state").textContent=`${code} 사용 중`;document.getElementById("home-exchange-state")?.replaceChildren(`${code} 사용 중`);document.getElementById("rate-view").textContent="불러오는 중";await loadRate();renderDashboard();status.textContent=rate?`${SUPPORTED_CURRENCIES[code].name} 환율로 변경되었습니다.`:`${SUPPORTED_CURRENCIES[code].name}를 선택했습니다. 환율 조회에 실패하면 잠시 후 새로고침해 주세요.`;setHoldingsStatus(`${SUPPORTED_CURRENCIES[code].name} 보유액을 표시합니다.`);button.disabled=false;button.textContent="통화 변경하기";trackEvent("exchange_saved",{success:Boolean(rate),feature:code});scheduleCloudSave()}
+function updateCurrencyLabels(){const code=selectedCurrency(),meta=SUPPORTED_CURRENCIES[code];document.getElementById("exchange-currency").value=code;document.getElementById("holdings-title").textContent=`보유 ${meta.name}`;document.getElementById("wallet-currency-unit").textContent=code;document.getElementById("cash-currency-unit").textContent=code;document.getElementById("foreign-input-label").textContent=`${meta.name} 금액`;document.getElementById("foreign-input-code").textContent=code;document.getElementById("foreign-result-label").textContent=`예상 ${meta.name}`}
+function updateExchangeUI(){const enabled=exchangeEnabled(),code=selectedCurrency();document.getElementById("exchange-off-panel").classList.toggle("hidden",enabled);document.getElementById("exchange-content").setAttribute("aria-hidden",String(!enabled));document.getElementById("exchange-section-state").textContent=enabled?`${code} 사용 중`:"기능 사용 안 함";document.getElementById("home-exchange-state")?.replaceChildren(enabled?`${code} 사용 중`:"사용 안 함");document.getElementById("holdings-save-status").textContent="";updateCurrencyLabels();if(enabled){loadHoldings();loadRate()}else{rate=null;["wallet-yen","cash-yen","yen-input","krw-input"].forEach(id=>document.getElementById(id).value="");document.getElementById("total-yen").textContent="미등록";document.getElementById("krw-result").textContent="–";document.getElementById("yen-result").textContent="–"}}
+async function loadRate(){
+ if(!exchangeEnabled())return;
+ const code=selectedCurrency(),meta=SUPPORTED_CURRENCIES[code],state=document.getElementById("rate-state");state.textContent="환율을 불러오는 중";
+ try{
+  const r=await fetch(`https://api.frankfurter.dev/v2/rate/${code}/KRW`, {cache:"no-store"});
+  if(!r.ok)throw new Error(`API 오류 ${r.status}`);
+  const data=await r.json();
+  const fetchedRate=Number(data.rate);
+  if(!Number.isFinite(fetchedRate))throw new Error("환율 데이터 형식 오류");
+  const rateDate=data.date||new Date().toISOString().slice(0,10);
+  writeJSON(RATE_CACHE_KEY,{...rateCache(),[code]:{rate:fetchedRate,date:rateDate}});if(code!==selectedCurrency())return;rate=fetchedRate;
+  document.getElementById("rate-view").textContent=`${meta.rateUnit.toLocaleString()} ${code} = ${(rate*meta.rateUnit).toLocaleString(undefined,{maximumFractionDigits:2})}원`;
+  state.textContent=`기준일 ${rateDate} · Frankfurter v2`;
+  trackEvent("exchange_rate_refreshed",{success:true,source:"frankfurter",feature:code});
+ }catch(e){
+  if(code!==selectedCurrency())return;
+  const c=rateCache()[code];
+  if(c&&Number.isFinite(Number(c.rate))){rate=Number(c.rate);document.getElementById("rate-view").textContent=`${meta.rateUnit.toLocaleString()} ${code} = ${(rate*meta.rateUnit).toLocaleString(undefined,{maximumFractionDigits:2})}원`;state.textContent=`마지막 저장 환율 · ${c.date}`}
+  else{document.getElementById("rate-view").textContent="조회 실패";state.textContent="환율 서버 연결 실패 · 잠시 후 다시 시도해 주세요"}
+ }
+ calculate();
+}
+function nullableNum(id){const raw=document.getElementById(id).value.replace(/,/g,"").trim();if(raw==="")return null;const value=Number(raw);return Number.isFinite(value)&&value>=0?value:null}
+function num(id){return nullableNum(id)??0}
+function calculate(){
+ if(!exchangeEnabled())return;const code=selectedCurrency(),meta=SUPPORTED_CURRENCIES[code],wallet=nullableNum("wallet-yen"),cash=nullableNum("cash-yen"),foreign=nullableNum("yen-input"),krw=nullableNum("krw-input"),format=value=>Number(value).toLocaleString(undefined,{maximumFractionDigits:meta.decimals});
+ document.getElementById("total-yen").textContent=wallet===null&&cash===null?"미등록":`${format((wallet||0)+(cash||0))} ${code}`;
+ document.getElementById("krw-result").textContent=rate&&foreign!==null?Math.round(foreign*rate).toLocaleString()+"원":"–";document.getElementById("yen-result").textContent=rate&&krw!==null?`${format(krw/rate)} ${code}`:"–";
+ if(document.getElementById("budget-cards").children.length)updateBudgetTotals();
+}
+function loadHoldings(){
+ const values=isGuestAccess()?DEFAULT_HOLDINGS:holdingsFor(),meta=SUPPORTED_CURRENCIES[selectedCurrency()],format=value=>Number(value).toLocaleString(undefined,{maximumFractionDigits:meta.decimals});
+ document.getElementById("wallet-yen").value=values.wallet===null||values.wallet===undefined?"":format(values.wallet);
+ document.getElementById("cash-yen").value=values.cash===null||values.cash===undefined?"":format(values.cash);
+ calculate();
+}
+function setHoldingsStatus(message){document.getElementById("holdings-save-status").textContent=message}
+function saveHoldings(){const code=selectedCurrency();if(!isGuestAccess()){const all=allCurrencyHoldings(),value={wallet:nullableNum("wallet-yen"),cash:nullableNum("cash-yen")};all[code]=value;writeJSON(CURRENCY_HOLDINGS_KEY,all);if(code==="JPY")writeJSON(HOLDINGS_KEY,value)}calculate();renderDashboard();setHoldingsStatus(`${SUPPORTED_CURRENCIES[code].name} 보유액이 저장되었습니다.`);trackEvent("exchange_saved",{success:!isGuestAccess(),feature:code});if(!isGuestAccess())scheduleCloudSave()}
+["wallet-yen","cash-yen"].forEach(id=>document.getElementById(id).addEventListener("input",()=>{calculate();setHoldingsStatus("저장되지 않은 변경사항이 있습니다.")}));
+["yen-input","krw-input"].forEach(id=>document.getElementById(id).addEventListener("input",calculate));
+document.getElementById("save-holdings").onclick=saveHoldings;
+document.getElementById("reset-holdings").onclick=()=>{const code=selectedCurrency();if(!isGuestAccess()){const all=allCurrencyHoldings();all[code]={...DEFAULT_HOLDINGS};writeJSON(CURRENCY_HOLDINGS_KEY,all);if(code==="JPY")writeJSON(HOLDINGS_KEY,DEFAULT_HOLDINGS)}loadHoldings();renderDashboard();setHoldingsStatus(`보유 ${SUPPORTED_CURRENCIES[code].name}가 초기화되었습니다.`);if(!isGuestAccess())scheduleCloudSave()};
+document.getElementById("save-exchange-currency").onclick=saveCurrencySelection;
+document.getElementById("exchange-currency").onchange=event=>{const code=event.target.value;document.getElementById("currency-change-status").textContent=`${SUPPORTED_CURRENCIES[code].name}를 선택했습니다. 통화 변경하기를 눌러 적용해 주세요.`};
+document.getElementById("refresh-rate").onclick=loadRate;
+document.getElementById("enable-exchange").onclick=()=>saveExchangeSettings(true);document.getElementById("disable-exchange").onclick=()=>saveExchangeSettings(false);updateExchangeUI();
+
+const BUDGETS={
+ fuji:{title:"후지록",items:[
+  {id:"flight",label:"항공",currency:"KRW",value:0},{id:"hotel",label:"숙소",currency:"JPY",value:0},
+  {id:"shuttle",label:"셔틀",currency:"JPY",value:0},{id:"gondola",label:"곤돌라",currency:"JPY",value:0},
+  {id:"rental",label:"렌터카",currency:"KRW",value:0},{id:"parking",label:"주차",currency:"JPY",value:0},
+  {id:"fuel",label:"주유",currency:"KRW",value:0},{id:"toll",label:"톨비",currency:"KRW",value:0}]}
+};
+function getBudget(){if(isGuestAccess())return{};const saved=readJSON(BUDGET_KEY,{});return saved&&typeof saved==="object"?saved:{}}
+function renderBudget(){
+ const saved=getBudget(),root=document.getElementById("budget-cards");
+ root.innerHTML=Object.entries(BUDGETS).map(([type,trip])=>`<article class="card"><h2>${trip.title}</h2><table class="budget-table"><tbody>${trip.items.map(item=>{
+  const key=`${type}-${item.id}`,value=isGuestAccess()?0:Object.prototype.hasOwnProperty.call(saved,key)?saved[key]:item.value;
+  const isPending=value===null;
+  return `<tr><th scope="row"><label for="budget-${key}">${item.label}</label></th><td><input class="budget-input" id="budget-${key}" data-budget="${key}" data-currency="${item.currency}" inputmode="numeric" value="${isPending?"":Number(value).toLocaleString()}" placeholder="미정" aria-label="${trip.title} ${item.label} ${item.currency==='KRW'?'원':'엔'}">${isPending?`<span class="badge">미정</span>`:""}</td><td>${item.currency==="KRW"?"원":"엔"}</td></tr>`}).join("")}</tbody></table><div class="budget-total"><small>합계</small><b id="budget-total-${type}"></b><small id="budget-converted-${type}"></small></div></article>`).join("");
+ root.querySelectorAll("[data-budget]").forEach(input=>{input.addEventListener("input",()=>{const data=getBudget(),raw=input.value.replace(/,/g,"").trim();data[input.dataset.budget]=raw===""?null:(Number.isFinite(Number(raw))&&Number(raw)>=0?Number(raw):0);if(!isGuestAccess())writeJSON(BUDGET_KEY,data);const badge=input.parentElement.querySelector(".badge");if(badge)badge.classList.toggle("hidden",raw!=="");updateBudgetTotals();if(!isGuestAccess())scheduleCloudSave()});input.addEventListener("change",()=>trackEvent("budget_updated",{trip_id:input.dataset.budget.split("-")[0],section:"budget",feature:input.dataset.budget}))});
+ updateBudgetTotals();
+}
+function updateBudgetTotals(){
+ const jpyRate=selectedCurrency()==="JPY"?rate:Number(rateCache().JPY?.rate);Object.entries(BUDGETS).forEach(([type,trip])=>{let krw=0,jpy=0;trip.items.forEach(item=>{const input=document.querySelector(`[data-budget="${type}-${item.id}"]`),raw=input?input.value.replace(/,/g,"").trim():"";if(raw==="")return;const value=Number(raw);if(!Number.isFinite(value)||value<0)return;if(item.currency==="KRW")krw+=value;else jpy+=value});
+  document.getElementById(`budget-total-${type}`).textContent=`${krw.toLocaleString()}원 + ${jpy.toLocaleString()}엔`;
+  document.getElementById(`budget-converted-${type}`).textContent=Number.isFinite(jpyRate)?`현재 환율 기준 약 ${Math.round(krw+jpy*jpyRate).toLocaleString()}원`:"JPY 환율 조회 후 예상 원화 합계를 표시합니다";
+ });
+}
+renderBudget();
+
+const CLOUD_TABLE="travel_companion_data";
+const cloudConfig=window.TRAVEL_CONFIG||{};
+const cloudClient=cloudConfig.supabaseUrl&&cloudConfig.supabasePublishableKey&&window.supabase
+ ? window.supabase.createClient(cloudConfig.supabaseUrl,cloudConfig.supabasePublishableKey)
+ : null;
+const VISITOR_ID_KEY="festival-passport-visitor-id-v1";
+const LAST_SYNC_KEY="festival-passport-last-sync-v1";
+function visitorId(){try{let id=localStorage.getItem(VISITOR_ID_KEY);if(!id){id=crypto.randomUUID();localStorage.setItem(VISITOR_ID_KEY,id)}return id}catch{return crypto.randomUUID()}}
+function setVisitorCount(id,value){document.getElementById(id).textContent=Number.isFinite(Number(value))?Number(value).toLocaleString():"–"}
+async function initVisitorCounters(){
+ if(!cloudClient)return;
+ const id=visitorId();
+ const {data,error}=await cloudClient.rpc("record_site_visit",{p_visitor_token:id});
+ if(!error){const counts=Array.isArray(data)?data[0]:data;setVisitorCount("daily-visitors",counts?.daily_visitors);setVisitorCount("total-visitors",counts?.total_visitors)}
+ const channel=cloudClient.channel("festival-passport-live",{config:{presence:{key:id}}});
+ channel.on("presence",{event:"sync"},()=>setVisitorCount("live-visitors",Object.keys(channel.presenceState()).length)).subscribe(async status=>{if(status==="SUBSCRIBED")await channel.track({online_at:new Date().toISOString()})});
+ window.addEventListener("pagehide",()=>channel.untrack(),{once:true});
+}
+let cloudUser=null,cloudTimer=null,applyingCloud=false;
+function formatLastSync(value){if(!value)return"기록 없음";const date=new Date(value);return Number.isNaN(date.getTime())?"기록 없음":new Intl.DateTimeFormat("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(date)}
+function setCloudStatus(message){const status=document.getElementById("cloud-status");if(status)status.textContent=message;const connected=Boolean(cloudUser&&!cloudUser.is_anonymous);document.getElementById("sync-indicator").textContent=connected?"클라우드 동기화됨":"이 기기에 저장 중";document.getElementById("last-sync-state").textContent=formatLastSync(readJSON(LAST_SYNC_KEY,null))}
+function tripEngineCloudData(){return Object.fromEntries(allTrips().filter(trip=>trip.id!=="fuji").map(trip=>[trip.id,{events:tripEvents(trip.id),stays:tripStays(trip.id),budget:tripBudget(trip.id),checks:getSaved(trip.id),checklist:getChecklistDefinition(trip.id)}]))}
+function localCloudPayload(){return{fuji_checks:getSaved("fuji"),sonic_checks:getSaved("sonic"),checklists:{fuji:getChecklistDefinition("fuji"),sonic:getChecklistDefinition("sonic"),readiness:readinessData(),settings:{exchange:exchangeSettings(),hiddenDefaultTrips:hiddenDefaultTrips()},personalItineraries:personalItineraries(),personalStays:personalStays(),customTrips:customTrips(),pastFestivalRecords:pastFestivalRecords(),tripEngine:tripEngineCloudData()},holdings:allCurrencyHoldings(),budget:getBudget(),updated_at:new Date().toISOString()}}
+function scheduleCloudSave(){if(!cloudUser||cloudUser.is_anonymous||applyingCloud)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(saveCloudData,500)}
+async function saveCloudData(){
+ if(!cloudClient||!cloudUser||cloudUser.is_anonymous||applyingCloud)return;
+ setCloudStatus("클라우드에 저장 중");
+ const {error}=await cloudClient.from(CLOUD_TABLE).upsert({user_id:cloudUser.id,...localCloudPayload()},{onConflict:"user_id"});
+ if(!error)writeJSON(LAST_SYNC_KEY,new Date().toISOString());
+ setCloudStatus(error?"동기화 실패 · 다시 시도해 주세요":"동기화 완료");
+ if(error)console.error("Cloud save failed",error.message);
+}
+function applyCloudData(data){
+ applyingCloud=true;
+ writeJSON(storageKey("fuji"),data.fuji_checks||{});writeJSON(storageKey("sonic"),data.sonic_checks||{});
+ if(data.checklists?.fuji)writeJSON(checklistDefinitionKey("fuji"),data.checklists.fuji);if(data.checklists?.sonic)writeJSON(checklistDefinitionKey("sonic"),data.checklists.sonic);
+ if(data.checklists?.readiness)writeJSON(READINESS_KEY,data.checklists.readiness);if(data.checklists?.settings?.exchange)writeJSON(EXCHANGE_SETTINGS_KEY,data.checklists.settings.exchange);if(Array.isArray(data.checklists?.settings?.hiddenDefaultTrips))writeJSON(HIDDEN_DEFAULT_TRIPS_KEY,data.checklists.settings.hiddenDefaultTrips);
+ if(Array.isArray(data.checklists?.personalItineraries))writeJSON(PERSONAL_ITINERARY_KEY,data.checklists.personalItineraries);if(Array.isArray(data.checklists?.personalStays))writeJSON(PERSONAL_STAY_KEY,data.checklists.personalStays);
+ if(Array.isArray(data.checklists?.customTrips))writeJSON(CUSTOM_TRIPS_KEY,data.checklists.customTrips);if(Array.isArray(data.checklists?.pastFestivalRecords))writeJSON(PAST_RECORDS_KEY,data.checklists.pastFestivalRecords);
+ if(data.holdings&&typeof data.holdings==="object"){if(Object.prototype.hasOwnProperty.call(data.holdings,"wallet")){writeJSON(HOLDINGS_KEY,data.holdings);writeJSON(CURRENCY_HOLDINGS_KEY,{JPY:data.holdings})}else{writeJSON(CURRENCY_HOLDINGS_KEY,data.holdings);if(data.holdings.JPY)writeJSON(HOLDINGS_KEY,data.holdings.JPY)}}
+ Object.entries(data.checklists?.tripEngine||{}).forEach(([id,value])=>{if(Array.isArray(value.events))writeJSON(tripEventsKey(id),value.events);if(Array.isArray(value.stays))writeJSON(tripStaysKey(id),value.stays);if(Array.isArray(value.budget))writeJSON(tripBudgetKey(id),value.budget);if(value.checks)writeJSON(storageKey(id),value.checks);if(Array.isArray(value.checklist))writeJSON(checklistDefinitionKey(id),value.checklist)});
+ rerenderChecklist("fuji");rerenderChecklist("sonic");renderPersonalItineraries();renderPersonalStays();updateExchangeUI();renderBudget();renderBottomNav();renderDashboard();applyingCloud=false;
+}
+async function initialCloudSync(){
+ if(!cloudClient||!cloudUser||cloudUser.is_anonymous)return;
+ setCloudStatus("클라우드 데이터 확인 중");
+ const {data,error}=await cloudClient.from(CLOUD_TABLE).select("*").eq("user_id",cloudUser.id).maybeSingle();
+ if(error){setCloudStatus("동기화 설정을 확인해 주세요");console.error("Cloud load failed",error.message);return}
+ if(data)applyCloudData(data);else await saveCloudData();
+ writeJSON(LAST_SYNC_KEY,new Date().toISOString());
+ setCloudStatus("동기화 완료");
+}
+function updateAuthUI(){
+ const signedIn=Boolean(cloudUser&&!cloudUser.is_anonymous);document.getElementById("signed-out-controls").classList.toggle("hidden",signedIn);document.getElementById("signed-in-controls").classList.toggle("hidden",!signedIn);document.getElementById("sync-auth-state").textContent=signedIn?"로그인됨":"로그아웃";document.getElementById("sync-email-state").textContent=signedIn?(cloudUser.email||"연결됨"):"–";
+ if(signedIn)setCloudStatus("클라우드 동기화됨");else setCloudStatus(cloudClient?"이 기기에 안전하게 저장 중":"동기화 설정이 없습니다");renderMyPage();
+}
+async function initCloud(){
+ if(!cloudClient){updateAuthUI();return}
+ const {data}=await cloudClient.auth.getSession();cloudUser=data.session?.user||null;updateAuthUI();if(cloudUser&&!cloudUser.is_anonymous)await initialCloudSync();if(activeGroupId&&cloudUser)await loadActiveGroup();
+cloudClient.auth.onAuthStateChange((_event,session)=>{cloudUser=session?.user||null;updateAuthUI();if(cloudUser&&!cloudUser.is_anonymous)setTimeout(initialCloudSync,0);if(cloudUser&&activeGroupId)setTimeout(loadActiveGroup,0);if(!cloudUser){activeGroupId=null;activeGroupName="";activeGroupOwnerId="";activeGroupStays=[];sessionStorage.removeItem(ACTIVE_GROUP_KEY);groupArea.classList.add("hidden");applyPrivateData(null)}});
+ cloudClient.channel("travel-data-sync").on("postgres_changes",{event:"UPDATE",schema:"public",table:CLOUD_TABLE},payload=>{if(cloudUser&&!cloudUser.is_anonymous&&payload.new.user_id===cloudUser.id)applyCloudData(payload.new)}).subscribe();
+}
+document.getElementById("send-login-link").onclick=async()=>{const email=document.getElementById("auth-email").value.trim();if(!email){setCloudStatus("이메일 주소를 입력해 주세요");return}setCloudStatus("로그인 링크를 보내는 중");const {error}=await cloudClient.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});setCloudStatus(error?"로그인 링크 전송 실패":"이메일에서 로그인 링크를 확인해 주세요")};
+document.getElementById("sign-out").onclick=()=>cloudClient?.auth.signOut();
+document.getElementById("sync-now").onclick=initialCloudSync;
+const syncPanel=document.getElementById("sync-panel");function openSyncPanel(){if(typeof syncPanel.showModal==="function")syncPanel.showModal();else syncPanel.setAttribute("open","")}document.getElementById("sync-indicator").onclick=openSyncPanel;document.getElementById("open-sync-settings")?.addEventListener("click",openSyncPanel);document.getElementById("close-sync-settings").onclick=()=>syncPanel.close();syncPanel.addEventListener("click",event=>{if(event.target===syncPanel)syncPanel.close()});
+const tripFormDialog=document.getElementById("trip-form-dialog"),customTripForm=document.getElementById("custom-trip-form"),WIZARD_TITLES=["기본 정보","위치","날짜","지도 및 링크","여행 유형 및 기능","체크리스트","최종 확인"];let wizardStep=0;
+const WIZARD_CHECKLISTS={overseas:[["필수 서류",["페스티벌 티켓","여권","여행자보험"]],["여행 준비",["해외결제 카드","현지 교통수단","eSIM"]],["현장 준비",["편한 신발","우비·우산","이어플러그"]]],domestic:[["필수 준비",["페스티벌 티켓","신분증"]],["현장 준비",["편한 신발","우비·우산","이어플러그","보조배터리"]]],camping:[["필수 준비",["페스티벌 티켓","신분증"]],["캠핑 장비",["텐트","침낭","매트","랜턴"]],["현장 준비",["우비·우산","이어플러그","보조배터리"]]],urban:[["필수 준비",["페스티벌 티켓","신분증"]],["도심 이동",["교통카드","보조배터리"]],["현장 준비",["편한 신발","이어플러그"]]],empty:[]};
+function wizardData(){const data=new FormData(customTripForm),item=Object.fromEntries(data.entries());item.features=data.getAll("features");return item}
+function renderWizard(){document.querySelectorAll("[data-wizard-step]").forEach((step,index)=>step.classList.toggle("active",index===wizardStep));document.getElementById("wizard-progress").innerHTML=WIZARD_TITLES.map((_,index)=>`<span class="${index<=wizardStep?"active":""}"></span>`).join("");document.getElementById("wizard-step-title").textContent=WIZARD_TITLES[wizardStep];document.getElementById("wizard-step-count").textContent=`${wizardStep+1} / ${WIZARD_TITLES.length}`;document.getElementById("wizard-prev").classList.toggle("hidden",wizardStep===0);document.getElementById("wizard-next").classList.toggle("hidden",wizardStep===WIZARD_TITLES.length-1);document.getElementById("wizard-submit").classList.toggle("hidden",wizardStep!==WIZARD_TITLES.length-1);if(wizardStep===6){const item=wizardData();document.getElementById("wizard-summary").innerHTML=`<div><span>여행</span><b>${escapeHTML(item.title||"미입력")}</b></div><div><span>페스티벌</span><b>${escapeHTML(item.festivalName||"미입력")}</b></div><div><span>위치</span><b>${escapeHTML([item.city,item.location].filter(Boolean).join(" · ")||"미입력")}</b></div><div><span>행사</span><b>${escapeHTML(item.eventStart||"–")} – ${escapeHTML(item.eventEnd||"–")}</b></div><div><span>여행</span><b>${escapeHTML(item.travelStart||"–")} – ${escapeHTML(item.travelEnd||"–")}</b></div><div><span>기능</span><b>${item.features.length}개 사용</b></div><div><span>체크리스트</span><b>${escapeHTML(customTripForm.elements.checklistTemplate.selectedOptions[0].text)}</b></div>`}}
+function validateWizardStep(){const step=document.querySelector(`[data-wizard-step="${wizardStep}"]`),fields=[...step.querySelectorAll("input,select")];for(const field of fields){if(!field.checkValidity()){field.reportValidity();return false}}if(wizardStep===2){const item=wizardData();if(item.eventEnd<item.eventStart||item.travelEnd<item.travelStart){document.getElementById("trip-form-status").textContent="종료일은 시작일보다 빠를 수 없습니다.";return false}}document.getElementById("trip-form-status").textContent="";return true}
+function openTripForm(){wizardStep=0;customTripForm.reset();customTripForm.dataset.source="new";renderWizard();document.getElementById("trip-form-status").textContent="";if(typeof tripFormDialog.showModal==="function")tripFormDialog.showModal();else tripFormDialog.setAttribute("open","")}
+function closeTripForm(){tripFormDialog.close();customTripForm.reset();customTripForm.dataset.source="new";wizardStep=0}
+document.getElementById("wizard-next").onclick=()=>{if(validateWizardStep()){wizardStep=Math.min(6,wizardStep+1);renderWizard()}};document.getElementById("wizard-prev").onclick=()=>{wizardStep=Math.max(0,wizardStep-1);renderWizard()};document.getElementById("close-trip-form").onclick=closeTripForm;document.getElementById("cancel-trip-form").onclick=closeTripForm;tripFormDialog.addEventListener("click",event=>{if(event.target===tripFormDialog)closeTripForm()});customTripForm.addEventListener("submit",async event=>{event.preventDefault();if(!validateWizardStep())return;const submit=document.getElementById("wizard-submit"),item=wizardData(),id=`custom-${crypto.randomUUID()}`,enabledFeatures={overview:true},creationSource=customTripForm.dataset.source||"new";submit.disabled=true;document.getElementById("trip-form-status").textContent="행사장 위치를 확인하는 중입니다.";item.features.forEach(feature=>enabledFeatures[feature]=true);let latitude=item.latitude===""?null:Number(item.latitude),longitude=item.longitude===""?null:Number(item.longitude);if(latitude===null||longitude===null){const point=await resolvePlaceCoordinates({...item,countryCode:item.country,countryName:COUNTRY_NAMES[item.country]});if(point){latitude=point[0];longitude=point[1]}}const trip={...item,id,slug:id,countryCode:item.country,countryName:COUNTRY_NAMES[item.country],latitude,longitude,enabledFeatures,status:"planning",theme:item.country==="KR"?"sonic":"fuji",icon:"🎪",custom:true,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};delete trip.features;const groups=(WIZARD_CHECKLISTS[item.checklistTemplate]||[]).map(([label,items],groupIndex)=>({label,items:items.map((label,index)=>({id:`${id}-${groupIndex}-${index}`,label}))}));writeJSON(checklistDefinitionKey(id),groups);writeJSON(checklistWashKey(id),true);saveCustomTrips([...customTrips(),trip]);trackEvent("trip_created",tripAnalytics(trip,{source:creationSource,checklist_template:item.checklistTemplate}));if(creationSource==="archive_duplicate")trackEvent("trip_duplicate",tripAnalytics(trip,{source:"festival_archive"}));submit.disabled=false;closeTripForm();openTripDetail(id,"overview",true,"trip_created")});
+const RESET_DATA_KEYS=[storageKey("fuji"),storageKey("sonic"),checklistDefinitionKey("fuji"),checklistDefinitionKey("sonic"),checklistWashKey("fuji"),checklistWashKey("sonic"),PERSONAL_ITINERARY_KEY,PERSONAL_STAY_KEY,READINESS_KEY,EXCHANGE_SETTINGS_KEY,HOLDINGS_KEY,CURRENCY_HOLDINGS_KEY,BUDGET_KEY,RATE_CACHE_KEY,CUSTOM_TRIPS_KEY,HIDDEN_DEFAULT_TRIPS_KEY,PAST_RECORDS_KEY,LAST_SYNC_KEY],resetDataDialog=document.getElementById("reset-data-dialog");function openResetData(){document.getElementById("reset-cloud-notice").textContent=cloudUser&&!cloudUser.is_anonymous?"로그인 중이므로 초기화 상태가 다른 기기에도 동기화됩니다.":"이 기기에 저장된 준비 데이터만 초기화됩니다.";resetDataDialog.showModal()}function closeResetData(){resetDataDialog.close()}async function resetAppData(){RESET_DATA_KEYS.forEach(removeStored);window.FestivalArchive?.resetState();rate=null;rerenderChecklist("fuji");rerenderChecklist("sonic");renderPersonalItineraries();renderPersonalStays();updateExchangeUI();renderBudget();renderBottomNav();renderDashboard();closeResetData();if(cloudUser&&!cloudUser.is_anonymous)await saveCloudData();else setCloudStatus("초기화 완료 · 이 기기에 저장 중")}document.getElementById("reset-app-data")?.addEventListener("click",openResetData);document.getElementById("close-reset-data").onclick=closeResetData;document.getElementById("cancel-reset-data").onclick=closeResetData;document.getElementById("confirm-reset-data").onclick=resetAppData;resetDataDialog.addEventListener("click",event=>{if(event.target===resetDataDialog)closeResetData()});
+initCloud();
+initVisitorCounters();
+setTimeout(routeHash,0);
+</script>
+<script src="./festival-records.js?v=2"></script>
+</body>
+</html>
