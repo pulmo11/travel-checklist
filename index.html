@@ -97,7 +97,7 @@
     .trip-form-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:15px}.trip-form-section .wide{grid-column:1/-1}.trip-form-section label{font-size:12px;color:var(--muted)}.trip-form-section input,.trip-form-section select{width:100%;margin-top:6px;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff}
     .trip-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:15px}.trip-summary-grid .card{padding:16px}.trip-summary-grid b{display:block;margin-top:5px;font-size:20px}.trip-empty{padding:28px 14px;text-align:center;color:var(--muted)}
     .map-card{margin-top:15px;overflow:hidden}.map-frame{display:block;width:100%;height:240px;border:0;border-radius:16px;background:var(--surface2)}.map-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.map-link{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 12px;text-decoration:none;font-size:12px}.map-link.primary{background:var(--dark);border-color:var(--dark);color:#fff}
-    .world-map{height:min(58vh,520px);min-height:360px;border-radius:18px;overflow:hidden;background:#dce5df;z-index:1}.world-map-list{display:grid;gap:10px;margin-top:14px}.world-trip{width:100%;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:12px;border:1px solid var(--line);border-radius:15px;background:#fff;padding:12px;text-align:left}.world-trip .world-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:var(--surface2);font-size:20px}.world-trip small{display:block;color:var(--muted);margin-top:3px}.world-trip .map-state{font-size:11px;color:var(--muted)}
+    .world-map{height:min(58vh,520px);min-height:360px;border-radius:18px;overflow:hidden;background:#dce5df;z-index:1}.world-map-list{display:grid;gap:10px;margin-top:14px}.world-trip{width:100%;display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:12px;border:1px solid var(--line);border-radius:15px;background:#fff;padding:12px;text-align:left}.world-trip .world-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;background:var(--surface2);font-size:20px}.world-trip small{display:block;color:var(--muted);margin-top:3px}.world-trip .map-state{font-size:11px;color:var(--muted)}.past-festival-title{white-space:normal;word-break:keep-all;overflow-wrap:normal}
     .chips{display:flex;flex-wrap:wrap;gap:7px}
     .chip{background:rgba(255,255,255,.14);padding:7px 10px;border-radius:999px;font-size:12px}
     .tabs{display:flex;gap:8px;overflow-x:auto;padding:2px 0 13px;scrollbar-width:none}
@@ -255,6 +255,11 @@
       <div id="signed-in-controls" class="hidden"><div class="button-row"><button class="secondary-btn" id="sync-now">지금 동기화</button><button class="secondary-btn" id="sign-out">로그아웃</button></div></div>
     </div></dialog>
 
+    <dialog class="sync-panel" id="checklist-template-dialog" aria-labelledby="checklist-template-title"><div class="sync-panel-inner">
+      <div class="sync-panel-head"><div><h2 id="checklist-template-title" style="margin:0">체크리스트 템플릿</h2><p class="sub">이 기기에 저장된 템플릿을 현재 여행에 적용합니다.</p></div><button class="icon-btn" id="close-checklist-template" aria-label="템플릿 목록 닫기">×</button></div>
+      <div id="checklist-template-list"></div>
+    </div></dialog>
+
     <dialog class="trip-form-dialog" id="trip-form-dialog" aria-labelledby="trip-form-title"><div class="trip-form-inner">
       <div class="sync-panel-head"><div><h2 id="trip-form-title" style="margin:0">새 페스티벌 여행</h2><p class="sub">국내외 어디든 다음 여행을 등록할 수 있습니다.</p></div><button class="icon-btn" id="close-trip-form" aria-label="여행 추가 닫기">×</button></div>
       <div class="wizard-progress" id="wizard-progress"></div><div class="wizard-meta"><b id="wizard-step-title">기본 정보</b><span id="wizard-step-count">1 / 7</span></div>
@@ -368,6 +373,7 @@
     <section class="page" id="page-packing">
       <div class="section-title" style="margin-top:3px"><h2>짐싸기</h2><p>페스티벌별 분리 저장</p></div>
       <div class="tabs" id="packing-tabs"><button class="tab active" data-pack="fuji">🏕 후지록</button><button class="tab" data-pack="sonic">🎵 섬머소닉 도쿄</button></div>
+      <div class="button-row" style="margin:10px 0 14px"><button class="secondary-btn" id="checklist-save-template">템플릿으로 저장</button><button class="secondary-btn" id="checklist-load-template">템플릿 불러오기</button></div>
       <div id="packing-master"></div>
     </section>
 
@@ -402,6 +408,11 @@
       <div class="section-title" style="margin-top:3px"><h2>Upcoming Trips</h2><p>내가 준비하는 페스티벌 여행</p></div>
       <div class="button-row" style="margin-bottom:15px"><button class="secondary-btn" id="restore-default-trips">기본 여행 복원</button></div>
       <div class="grid two" id="trip-library"></div>
+      <div class="section-title" style="margin-top:24px"><h2 style="font-size:19px">인기 페스티벌</h2><p>공식 발표된 일정 기준, 탭 한 번으로 여행에 추가하세요</p></div>
+      <div class="grid two" id="kr-festival-templates" style="margin-bottom:22px"></div>
+      <div class="section-title" style="margin-top:3px"><h2 style="font-size:19px">일정 발표 대기 중</h2><p>공식 날짜가 나오면 인기 페스티벌 목록에 반영됩니다.</p></div>
+      <div class="grid two" id="kr-festival-tbd" style="margin-bottom:22px"></div>
+      <article class="card" style="margin-top:4px"><h3 style="margin:0 0 6px">지난 페스티벌도 기록해보세요</h3><p class="sub" style="margin:0 0 14px">이미 다녀온 페스티벌은 Festival World Map에서 지난 기록으로 추가할 수 있습니다.</p><button class="secondary-btn" data-go="worldmap">Festival World Map 바로가기</button></article>
     </section>
 
     <section class="page" id="page-worldmap">
@@ -409,6 +420,8 @@
       <article class="card"><div id="festival-world-map" class="world-map" aria-label="페스티벌 여행 세계 지도"></div><p class="sub" id="world-map-status">여행 위치를 지도에 표시하는 중입니다.</p></article>
       <div class="section-title"><h2>My Festival Destinations</h2><p id="world-map-count">0개 여행</p></div>
       <div class="world-map-list" id="world-map-list"></div>
+      <div class="section-title" style="margin-top:28px"><h2 class="past-festival-title" style="font-size:19px">지난 페스티벌</h2><p>종료된 행사를 지난 기록으로 추가해 지도에서 확인하세요</p></div>
+      <div class="grid two" id="kr-festival-past" style="margin-bottom:22px"></div>
     </section>
 
     <section class="page" id="page-budget">
@@ -675,6 +688,44 @@ const COUNTRY_NAMES={KR:"대한민국",JP:"Japan",US:"United States",HK:"Hong Ko
 const TRIP_FEATURES={overview:true,itinerary:false,transport:true,stay:true,packing:true,budget:true,group:true};
 function normalizeTrip(trip){return{...trip,slug:trip.slug||trip.id,countryCode:trip.countryCode||trip.country||"OTHER",countryName:trip.countryName||COUNTRY_NAMES[trip.countryCode||trip.country]||"기타",city:trip.city||trip.location||"미등록",location:trip.location||trip.city||"미등록",enabledFeatures:{...TRIP_FEATURES,...(trip.enabledFeatures||{}),itinerary:false},schemaVersion:2}}
 function allTrips(){const hidden=hiddenDefaultTrips();return[...TRIP_DEFINITIONS.filter(trip=>!hidden.includes(trip.id)),...customTrips()].map(normalizeTrip).sort((a,b)=>a.eventStart.localeCompare(b.eventStart))}
+const KR_FESTIVAL_TEMPLATES_2026=[
+  {key:"sjf2026",title:"서울재즈페스티벌 2026",icon:"🎷",city:"서울 올림픽공원",eventStart:"2026-05-22",eventEnd:"2026-05-24",latitude:37.5219,longitude:127.1236,note:"올림픽공원 · 재즈·소울·록을 넘나드는 국내 대표 음악 축제"},
+  {key:"peacetrain2026",title:"DMZ 피스트레인 뮤직페스티벌 2026",icon:"☮️",city:"강원 철원 고석정",eventStart:"2026-06-12",eventEnd:"2026-06-14",latitude:38.1476,longitude:127.3127,note:"철원 고석정 일원 · 분단의 역사를 음악으로 풀어내는 페스티벌"},
+  {key:"jumf2026",title:"전주 얼티밋 뮤직 페스티벌 2026",icon:"🎸",city:"전북 전주대학교",eventStart:"2026-08-14",eventEnd:"2026-08-16",latitude:35.7815,longitude:127.133,officialUrl:"https://www.jumf.co.kr/",note:"전주대학교 인조잔디구장 A·B 일원 · JUMF"},
+  {key:"busanrock2026",title:"부산국제록페스티벌 2026",icon:"🤘",city:"부산 삼락생태공원",eventStart:"2026-10-02",eventEnd:"2026-10-04",latitude:35.1799,longitude:128.9646,officialUrl:"https://busanrockfestival.com/",note:"삼락생태공원 · 인천 펜타포트와 함께하는 국내 양대 록 페스티벌"},
+  {key:"pentaport2026",title:"인천 펜타포트 락 페스티벌 2026",icon:"🎤",city:"인천 송도달빛축제공원",eventStart:"2026-07-31",eventEnd:"2026-08-02",latitude:37.3891,longitude:126.6373,officialUrl:"https://pentaport.co.kr/",note:"송도달빛축제공원 · NOL티켓·KB Pay 예매"},
+  {key:"gmf2026",title:"그랜드 민트 페스티벌 2026",icon:"🍃",city:"서울 올림픽공원",eventStart:"2026-10-17",eventEnd:"2026-10-18",latitude:37.5219,longitude:127.1236,officialUrl:"https://www.mintpaper.co.kr/festivals",note:"GMF · 감성·인디·밴드 라인업 · NOL·YES24티켓"},
+  {key:"bml2026",title:"뷰티풀 민트 라이프 2026",icon:"🌿",city:"서울 문화비축기지",eventStart:"2026-05-30",eventEnd:"2026-05-31",latitude:37.5691,longitude:126.8971,note:"BML · 민트페이퍼 20주년 · 문화비축기지 첫 개최"},
+  {key:"parkmusic2026",title:"서울 파크 뮤직 페스티벌 2026",icon:"🎶",city:"서울 올림픽공원",eventStart:"2026-06-20",eventEnd:"2026-06-21",latitude:37.5219,longitude:127.1236,note:"88잔디마당·수변무대 · 도심형 음악 페스티벌"},
+  {key:"greencamp2026",title:"그린캠프 페스티벌 2026",icon:"⛺",city:"경기 이천 지산포레스트리조트",eventStart:"2026-04-17",eventEnd:"2026-04-19",latitude:37.2783,longitude:127.2764,note:"캠핑하며 즐기는 숲속 힐링 페스티벌 · NOL·YES24·네이버"},
+  {key:"jarasum2026",title:"자라섬 재즈 페스티벌 2026",icon:"🎺",city:"경기 가평 자라섬",eventStart:"2026-10-09",eventEnd:"2026-10-11",latitude:37.826,longitude:127.524,officialUrl:"https://jarasumjazz.com/",note:"제23회 · 한글날 연휴 · 가을 단풍과 함께하는 재즈"},
+  {key:"edckorea2026",title:"EDC 코리아 2026",icon:"🌈",city:"인천 인스파이어 리조트",eventStart:"2026-10-03",eventEnd:"2026-10-04",latitude:37.4423,longitude:126.4903,officialUrl:"https://korea.edc.com/",note:"일렉트릭 데이지 카니발 한국판 · 글로벌 톱 DJ 라인업"},
+  {key:"wdf2026",title:"월드 디제이 페스티벌 2026",icon:"🎧",city:"경기 과천 서울랜드",eventStart:"2026-06-13",eventEnd:"2026-06-14",latitude:37.4272,longitude:127.0132,note:"WDF 20주년 · 국내 최초 EDM 페스티벌 · NOL(인터파크 단독)"},
+  {key:"herorock2026",title:"히어로 락 페스티벌 2026",icon:"🦸",city:"서울 문화비축기지",eventStart:"2026-04-25",eventEnd:"2026-04-26",latitude:37.5691,longitude:126.8971,note:"문화비축기지 · 멜론티켓 예매"},
+  {key:"letsrock2026",title:"렛츠락 페스티벌 2026",icon:"🤟",city:"서울 난지한강공원",eventStart:"2026-10-03",eventEnd:"2026-10-04",latitude:37.5665,longitude:126.8916,officialUrl:"http://letsrock.co.kr/",note:"20주년(SINCE 2007) · 도심형 록 페스티벌"},
+  {key:"waterbomb2026",title:"워터밤 서울 2026",icon:"💦",city:"경기 고양 킨텍스",eventStart:"2026-07-24",eventEnd:"2026-07-26",latitude:37.6688,longitude:126.744,officialUrl:"https://www.waterbombfestival.com/",note:"물총+K팝·힙합 공연이 결합된 여름 대표 페스티벌"}
+];
+const KR_FESTIVAL_TEMPLATES_TBD=[
+  {title:"원더리벳 2026 (WONDERLIVET)",icon:"🎌",city:"경기 고양 킨텍스",note:"J-POP 아이코닉 뮤직 페스티벌 · 2026년 공식 일정 발표 대기"},
+  {title:"Clockenflap 2026",icon:"🌏",city:"홍콩 센트럴 하버프론트",note:"홍콩 대표 뮤직·아트 페스티벌 · 2026년 공식 일정 발표 대기"}
+];
+const festivalIdentity=value=>String(value||"").toLocaleLowerCase().replace(/\s+/g,"");
+function renderKrFestivalTbd(){const root=document.getElementById("kr-festival-tbd");if(!root)return;root.innerHTML=KR_FESTIVAL_TEMPLATES_TBD.map(item=>`<article class="card"><div style="font-size:26px;margin-bottom:6px">${item.icon}</div><h3 style="margin:0 0 4px;font-size:15px">${escapeHTML(item.title)}</h3><p class="sub" style="margin:0 0 4px">${escapeHTML(item.city)}</p><p class="sub" style="margin:0 0 10px">${escapeHTML(item.note)}</p><button class="secondary-btn" disabled>공식 발표 대기</button></article>`).join("")}
+function todayISOString(){return localToday()}
+function renderKrFestivalTemplates(){
+ const root=document.getElementById("kr-festival-templates");if(!root)return;
+ const existing=new Set(allTrips().flatMap(trip=>[trip.title,trip.festivalName]).map(festivalIdentity)),items=KR_FESTIVAL_TEMPLATES_2026.filter(item=>item.eventEnd>=todayISOString()&&!existing.has(festivalIdentity(item.title)));
+ root.innerHTML=items.length?items.map(item=>`<article class="card"><div style="font-size:26px;margin-bottom:6px">${item.icon}</div><h3 style="margin:0 0 4px;font-size:15px">${escapeHTML(item.title)}</h3><p class="sub" style="margin:0 0 4px">${escapeHTML(item.city)}</p><p class="sub" style="margin:0 0 10px">${item.eventStart.slice(5).replace("-",".")} ~ ${item.eventEnd.slice(5).replace("-",".")}</p><button class="primary-btn" data-add-kr-festival="${item.key}">이 여행 추가</button></article>`).join(""):'<p class="sub">추가할 수 있는 인기 페스티벌이 없습니다.</p>';
+ root.querySelectorAll("[data-add-kr-festival]").forEach(button=>button.onclick=()=>addKrFestivalTemplate(button.dataset.addKrFestival))
+}
+function renderKrFestivalPast(){
+ const root=document.getElementById("kr-festival-past");if(!root)return;
+ const existing=new Set(pastFestivalRecords().flatMap(record=>[record.title,record.festivalName]).map(festivalIdentity)),items=KR_FESTIVAL_TEMPLATES_2026.filter(item=>item.eventEnd<todayISOString()&&!existing.has(festivalIdentity(item.title)));
+ root.innerHTML=items.length?items.map(item=>`<article class="card"><div style="font-size:26px;margin-bottom:6px;opacity:.6">${item.icon}</div><h3 style="margin:0 0 4px;font-size:15px">${escapeHTML(item.title)}</h3><p class="sub" style="margin:0 0 4px">${escapeHTML(item.city)}</p><p class="sub" style="margin:0 0 10px">${item.eventStart.slice(5).replace("-",".")} ~ ${item.eventEnd.slice(5).replace("-",".")} · 종료됨</p><button class="secondary-btn" data-add-kr-past="${item.key}">지난 기록으로 담기</button></article>`).join(""):'<p class="sub">추가할 지난 국내 페스티벌이 없습니다.</p>';
+ root.querySelectorAll("[data-add-kr-past]").forEach(button=>button.onclick=()=>addKrFestivalAsPastRecord(button.dataset.addKrPast))
+}
+function addKrFestivalAsPastRecord(key){const item=KR_FESTIVAL_TEMPLATES_2026.find(entry=>entry.key===key);if(!item)return;const normalize=window.FestivalArchive?.parsers?.normalizeRecord,raw={title:item.title,festivalName:item.title,eventStart:item.eventStart,eventEnd:item.eventEnd,countryCode:"KR",countryName:"대한민국",city:item.city,location:item.city,latitude:item.latitude,longitude:item.longitude,note:item.note},record=normalize?normalize(raw,"kr_festival_template"):{...raw,id:`past-${crypto.randomUUID()}`,recordType:"past",status:"past",source:"kr_festival_template",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},clean={...record,icon:item.icon};delete clean.errors;delete clean.warnings;delete clean.valid;delete clean.duplicate;writeJSON(PAST_RECORDS_KEY,[...pastFestivalRecords(),clean]);scheduleCloudSave();trackEvent("past_record_created",{source:"kr_festival_template"});renderKrFestivalPast();window.FestivalArchive?.renderWorldMap?.();renderMyPage()}
+function addKrFestivalTemplate(key){const item=KR_FESTIVAL_TEMPLATES_2026.find(entry=>entry.key===key);if(!item||allTrips().some(trip=>festivalIdentity(trip.title)===festivalIdentity(item.title)||festivalIdentity(trip.festivalName)===festivalIdentity(item.title)))return;const now=new Date().toISOString(),id=`custom-${crypto.randomUUID()}`,trip={id,slug:id,title:item.title,festivalName:item.title,countryCode:"KR",countryName:"대한민국",city:item.city,region:"",location:item.city,latitude:item.latitude,longitude:item.longitude,eventStart:item.eventStart,eventEnd:item.eventEnd,travelStart:item.eventStart,travelEnd:item.eventEnd,officialUrl:item.officialUrl||"",currency:"KRW",participants:[],memo:item.note,status:"planning",theme:"sonic",icon:item.icon,custom:true,enabledFeatures:{...TRIP_FEATURES},createdAt:now,updatedAt:now};writeJSON(CUSTOM_TRIPS_KEY,[...customTrips(),trip]);scheduleCloudSave();trackEvent("trip_created",tripAnalytics(trip,{source:"kr_festival_template"}));renderKrFestivalTemplates();renderTripLibrary();renderDashboard();renderPackingTabs();renderMyPage();renderBottomNav()}
 function findTrip(ref){return allTrips().find(trip=>trip.id===ref||trip.slug===ref)||null}
 const CURRENT_TRIP_KEY="festival-passport-current-trip-v1";
 const tripEventsKey=id=>`festival-passport-trip-${id}-events-v1`;
@@ -725,7 +776,7 @@ async function resolvePlaceCoordinates(item){if(tripHasCoordinates(item))return[
 async function resolveCurrentTripLocation(){if(!currentTrip?.custom)return;const button=document.getElementById("resolve-trip-location");if(button){button.disabled=true;button.textContent="위치 찾는 중"}const point=await resolvePlaceCoordinates(currentTrip);if(!point){if(button){button.disabled=false;button.textContent="다시 위치 찾기"}return alert("장소를 찾지 못했습니다. 지도 검색어나 위도·경도를 확인해 주세요.")}const updated=customTrips().map(trip=>trip.id===currentTrip.id?{...trip,latitude:point[0],longitude:point[1],updatedAt:new Date().toISOString()}:trip);writeJSON(CUSTOM_TRIPS_KEY,updated);currentTrip=findTrip(currentTrip.id);scheduleCloudSave();renderTripPanel("overview");toastMessage("지도 위치를 저장했습니다.")}
 function toastMessage(message){const old=document.querySelector(".app-toast");old?.remove();const node=document.createElement("div");node.className="archive-toast app-toast";node.textContent=message;document.body.appendChild(node);setTimeout(()=>node.remove(),2600)}
 function saveCustomTrips(items){writeJSON(CUSTOM_TRIPS_KEY,items);renderDashboard();scheduleCloudSave()}
-function removeTrip(id){const trip=findTrip(id);if(TRIP_DEFINITIONS.some(value=>value.id===id))writeJSON(HIDDEN_DEFAULT_TRIPS_KEY,[...new Set([...hiddenDefaultTrips(),id])]);else writeJSON(CUSTOM_TRIPS_KEY,customTrips().filter(value=>value.id!==id));trackEvent("trip_deleted",tripAnalytics(trip,{source:"upcoming_trips"}));renderPackingTabs();renderDashboard();scheduleCloudSave();if(!findTrip(id)&&currentTrip?.id===id)go("trips")}
+function removeTrip(id){const trip=findTrip(id);if(TRIP_DEFINITIONS.some(value=>value.id===id))writeJSON(HIDDEN_DEFAULT_TRIPS_KEY,[...new Set([...hiddenDefaultTrips(),id])]);else writeJSON(CUSTOM_TRIPS_KEY,customTrips().filter(value=>value.id!==id));trackEvent("trip_deleted",tripAnalytics(trip,{source:"upcoming_trips"}));renderPackingTabs();renderDashboard();renderKrFestivalTemplates();scheduleCloudSave();if(!findTrip(id)&&currentTrip?.id===id)go("trips")}
 const READINESS_KEY="festival-passport-readiness-v1";
 const READINESS_ITEMS=[
  {id:"ticket",label:"티켓",weight:3,page:"fuji",panel:"overview"},{id:"passport",label:"여권",weight:3,page:"packing"},{id:"flight",label:"항공",weight:3,page:"fuji",panel:"flight"},{id:"lodging",label:"숙소",weight:3,page:"fuji",panel:"hotel"},
@@ -827,6 +878,12 @@ function updateProgress(type){
 }
 renderChecklist("fuji",'[data-checklist="fuji"]');renderChecklist("sonic",'[data-checklist="sonic"]');
 let masterType="fuji";function renderPackingTabs(){const trips=allTrips().filter(trip=>trip.enabledFeatures.packing!==false),tabs=document.getElementById("packing-tabs"),root=document.getElementById("packing-master");if(!trips.length){tabs.innerHTML="";root.innerHTML='<div class="card empty">짐싸기를 사용할 여행이 없습니다.</div>';return}if(!trips.some(trip=>trip.id===masterType))masterType=trips[0].id;tabs.innerHTML=trips.map(trip=>`<button class="tab ${trip.id===masterType?"active":""}" data-pack="${trip.id}">${trip.icon||"🎪"} ${escapeHTML(trip.title)}</button>`).join("");renderChecklist(masterType,root);tabs.querySelectorAll("[data-pack]").forEach(button=>button.onclick=()=>{masterType=button.dataset.pack;renderPackingTabs()})}renderPackingTabs();
+const CHECKLIST_TEMPLATES_KEY="festival-passport-checklist-templates-v1";
+function checklistTemplates(){const value=readJSON(CHECKLIST_TEMPLATES_KEY,[]);return Array.isArray(value)?value:[]}
+document.getElementById("checklist-save-template").onclick=()=>{const name=prompt("템플릿 이름을 입력해 주세요 (예: 캠핑 페스티벌 기본형)");if(!name?.trim())return;const templates=checklistTemplates();templates.push({id:crypto.randomUUID(),name:name.trim(),groups:JSON.parse(JSON.stringify(getChecklistDefinition(masterType))),createdAt:new Date().toISOString()});writeJSON(CHECKLIST_TEMPLATES_KEY,templates);alert(`"${name.trim()}" 템플릿으로 저장했어요.`)};
+function renderChecklistTemplateList(){const templates=checklistTemplates(),list=document.getElementById("checklist-template-list");list.innerHTML=templates.length?templates.map(template=>`<article class="card" style="margin-bottom:10px"><h3 style="margin:0 0 6px">${escapeHTML(template.name)}</h3><p class="sub" style="margin:0 0 10px">${new Date(template.createdAt).toLocaleDateString("ko-KR")} 저장 · 항목 ${template.groups.reduce((sum,group)=>sum+group.items.length,0)}개</p><div class="button-row"><button class="primary-btn" data-apply-template="${template.id}">이 여행에 적용</button><button class="secondary-btn" data-delete-template="${template.id}">삭제</button></div></article>`).join(""):'<p class="sub">저장된 템플릿이 없어요. 먼저 템플릿으로 저장해 보세요.</p>';list.querySelectorAll("[data-apply-template]").forEach(button=>button.onclick=()=>{const template=templates.find(item=>item.id===button.dataset.applyTemplate);if(!template||!confirm(`"${template.name}" 템플릿을 현재 짐싸기 목록에 적용할까요? 기존 체크 상태는 초기화돼요.`))return;writeJSON(checklistDefinitionKey(masterType),JSON.parse(JSON.stringify(template.groups)));writeJSON(checklistWashKey(masterType),true);writeJSON(storageKey(masterType),{});rerenderChecklist(masterType);document.getElementById("checklist-template-dialog").close()});list.querySelectorAll("[data-delete-template]").forEach(button=>button.onclick=()=>{if(!confirm("이 템플릿을 삭제할까요?"))return;writeJSON(CHECKLIST_TEMPLATES_KEY,checklistTemplates().filter(item=>item.id!==button.dataset.deleteTemplate));renderChecklistTemplateList()})}
+document.getElementById("checklist-load-template").onclick=()=>{renderChecklistTemplateList();document.getElementById("checklist-template-dialog").showModal()};
+document.getElementById("close-checklist-template").onclick=()=>document.getElementById("checklist-template-dialog").close();
 const APP_ICON_PATHS={house:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/>',luggage:'<path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><rect x="5" y="7" width="14" height="14" rx="2"/><path d="M9 11v6M15 11v6M8 21v1M16 21v1"/>',wallet:'<path d="M4 6a2 2 0 0 1 2-2h12v4H6a2 2 0 0 0 0 4h14v8H6a2 2 0 0 1-2-2Z"/><path d="M16 12v4h4M17.5 14h.01"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>','map-pinned':'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 12v9"/><circle cx="15" cy="7.5" r="2.5"/><path d="M15 10c-2 2-3 3.5-3 3.5"/>',receipt:'<path d="M6 3h12v19l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6M9 16h4"/>'};
 function appIcon(name){return`<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true">${APP_ICON_PATHS[name]||APP_ICON_PATHS.house}</svg>`}
 function renderTravelToolIcons(){document.querySelectorAll("[data-tool-icon]").forEach(node=>node.innerHTML=appIcon(node.dataset.toolIcon))}
@@ -890,7 +947,7 @@ let festivalWorldMap=null;function renderWorldMap(){const trips=allTrips(),list=
 
 function go(page,updateHistory=true){
  if(["fuji","sonic"].includes(page))return openTripDetail(page,"overview",updateHistory);
- restoreLegacyTripPanels();if(page==="mypage")renderMyPage();if(page==="budget")renderBudget();showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}if(page==="guide")trackEvent("guide_view",{section:"guide"});if(page==="feedback")prepareFeedbackPage();const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${page}`);
+ restoreLegacyTripPanels();if(page==="mypage")renderMyPage();if(page==="budget")renderBudget();if(page==="trips"){renderTripLibrary();renderKrFestivalTemplates();renderKrFestivalTbd()}showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();renderKrFestivalPast();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}if(page==="guide")trackEvent("guide_view",{section:"guide"});if(page==="feedback")prepareFeedbackPage();const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${page}`);
 }
 document.querySelectorAll("[data-go]:not(.nav-btn)").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 function routeHash(){const route=decodeURIComponent(location.hash.replace(/^#/,""));if(route.startsWith("trip/")){const [,id,tab="overview"]=route.split("/");return openTripDetail(id,tab,false,"history")}if(["fuji","sonic"].includes(route))return findTrip(route)?openTripDetail(route,"overview",false,"legacy_route"):go("trips",false);if(["home","trips","packing","currency","worldmap","budget","mypage","guide","feedback"].includes(route))go(route,false);else go("home",false)}
@@ -1129,6 +1186,6 @@ initCloud();
 initVisitorCounters();
 setTimeout(routeHash,0);
 </script>
-<script src="./festival-records.js?v=3"></script>
+<script src="./festival-records.js?v=6"></script>
 </body>
 </html>
