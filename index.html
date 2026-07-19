@@ -1084,19 +1084,23 @@ async function initVisitorCounters(){
  channel.on("presence",{event:"sync"},()=>setVisitorCount("live-visitors",Object.keys(channel.presenceState()).length)).subscribe(async status=>{if(status==="SUBSCRIBED")await channel.track({online_at:new Date().toISOString()})});
  window.addEventListener("pagehide",()=>channel.untrack(),{once:true});
 }
-let cloudUser=null,cloudTimer=null,applyingCloud=false;
+let cloudUser=null,cloudTimer=null,applyingCloud=false,cloudSaveInFlight=false,cloudSaveQueued=false,cloudLocalRevision=0,cloudSavedRevision=0;
 function formatLastSync(value){if(!value)return"기록 없음";const date=new Date(value);return Number.isNaN(date.getTime())?"기록 없음":new Intl.DateTimeFormat("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"}).format(date)}
 function setCloudStatus(message){const status=document.getElementById("cloud-status");if(status){status.textContent=message;status.classList.toggle("error",/실패|확인해 주세요/.test(message));status.classList.toggle("success",/완료|동기화됨/.test(message))}const connected=Boolean(cloudUser&&!cloudUser.is_anonymous);document.getElementById("sync-indicator").textContent=connected?"클라우드 동기화됨":"이 기기에 저장 중";document.getElementById("last-sync-state").textContent=formatLastSync(readJSON(LAST_SYNC_KEY,null))}
 function tripEngineCloudData(){return Object.fromEntries(allTrips().filter(trip=>trip.id!=="fuji").map(trip=>[trip.id,{events:tripEvents(trip.id),stays:tripStays(trip.id),budget:tripBudget(trip.id),checks:getSaved(trip.id),checklist:getChecklistDefinition(trip.id)}]))}
 function localCloudPayload(){return{fuji_checks:getSaved("fuji"),sonic_checks:getSaved("sonic"),checklists:{fuji:getChecklistDefinition("fuji"),sonic:getChecklistDefinition("sonic"),readiness:readinessData(),settings:{exchange:exchangeSettings(),hiddenDefaultTrips:hiddenDefaultTrips()},personalItineraries:personalItineraries(),personalStays:personalStays(),customTrips:customTrips(),pastFestivalRecords:pastFestivalRecords(),tripEngine:tripEngineCloudData()},holdings:allCurrencyHoldings(),budget:getBudget(),updated_at:new Date().toISOString()}}
-function scheduleCloudSave(){if(!cloudUser||cloudUser.is_anonymous||applyingCloud)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(saveCloudData,500)}
+function hasPendingCloudChanges(){return cloudSaveInFlight||Boolean(cloudTimer)||cloudSaveQueued||cloudLocalRevision>cloudSavedRevision}
+function scheduleCloudSave(){if(!cloudUser||cloudUser.is_anonymous||applyingCloud)return;cloudLocalRevision+=1;clearTimeout(cloudTimer);setCloudStatus("변경사항 저장 대기 중");cloudTimer=setTimeout(()=>{cloudTimer=null;saveCloudData()},500)}
 async function saveCloudData(){
  if(!cloudClient||!cloudUser||cloudUser.is_anonymous||applyingCloud)return;
+ if(cloudSaveInFlight){cloudSaveQueued=true;return}
+ clearTimeout(cloudTimer);cloudTimer=null;cloudSaveInFlight=true;cloudSaveQueued=false;const savingRevision=cloudLocalRevision;
  setCloudStatus("클라우드에 저장 중");
- const {error}=await cloudClient.from(CLOUD_TABLE).upsert({user_id:cloudUser.id,...localCloudPayload()},{onConflict:"user_id"});
- if(!error)writeJSON(LAST_SYNC_KEY,new Date().toISOString());
+ let error=null;try{const result=await cloudClient.from(CLOUD_TABLE).upsert({user_id:cloudUser.id,...localCloudPayload()},{onConflict:"user_id"});error=result.error}catch(caught){error=caught}
+ if(!error){cloudSavedRevision=Math.max(cloudSavedRevision,savingRevision);writeJSON(LAST_SYNC_KEY,new Date().toISOString())}
  setCloudStatus(error?"동기화 실패 · 다시 시도해 주세요":"동기화 완료");
  if(error)console.error("Cloud save failed",error.message);
+ cloudSaveInFlight=false;const shouldSaveAgain=cloudSaveQueued||(!error&&cloudLocalRevision>cloudSavedRevision);cloudSaveQueued=false;if(shouldSaveAgain)setTimeout(saveCloudData,0);
 }
 function applyCloudData(data){
  applyingCloud=true;
@@ -1127,7 +1131,7 @@ async function initCloud(){
  if(!cloudClient){updateAuthUI();return}
  const {data}=await cloudClient.auth.getSession();cloudUser=data.session?.user||null;updateAuthUI();if(cloudUser&&!cloudUser.is_anonymous)await initialCloudSync();if(cloudUser)await restoreJoinedGroup();
 cloudClient.auth.onAuthStateChange((event,session)=>{cloudUser=session?.user||null;updateAuthUI();if(cloudUser&&!cloudUser.is_anonymous)setTimeout(()=>initialCloudSync(event==="SIGNED_IN"),0);if(cloudUser)setTimeout(restoreJoinedGroup,0);if(!cloudUser){if(activeGroupChannel)cloudClient.removeChannel(activeGroupChannel);activeGroupChannel=null;activeGroupChannelId="";activeGroupId=null;activeGroupName="";activeGroupOwnerId="";activeGroupItems=[];activeGroupStays=[];clearActiveGroup();groupArea.classList.add("hidden");applyPrivateData(null)}});
- cloudClient.channel("travel-data-sync").on("postgres_changes",{event:"UPDATE",schema:"public",table:CLOUD_TABLE},payload=>{if(cloudUser&&!cloudUser.is_anonymous&&payload.new.user_id===cloudUser.id)applyCloudData(payload.new)}).subscribe();
+ cloudClient.channel("travel-data-sync").on("postgres_changes",{event:"UPDATE",schema:"public",table:CLOUD_TABLE},payload=>{if(cloudUser&&!cloudUser.is_anonymous&&payload.new.user_id===cloudUser.id&&!hasPendingCloudChanges())applyCloudData(payload.new)}).subscribe();
 }
 let loginLinkTimer=null;
 function showLoginLinkFeedback(message,state=""){const feedback=document.getElementById("login-link-feedback");feedback.hidden=false;feedback.textContent=message;feedback.classList.toggle("success",state==="success");feedback.classList.toggle("error",state==="error")}
