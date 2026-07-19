@@ -130,8 +130,8 @@
     .check-group{background:var(--surface);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin:12px 0}
     .check-group-head{padding:12px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;font-weight:700}
     .check-group-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.check-edit-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 8px;font-size:11px;color:var(--muted)}
-    .check-item{display:flex;gap:10px;align-items:center;padding:11px 17px;border-bottom:1px solid #eeeDE8}
-    .check-item label{display:flex;gap:12px;align-items:flex-start;min-width:0;flex:1;cursor:pointer}
+    .check-item{display:flex;gap:10px;align-items:center;min-height:52px;padding:7px 12px 7px 17px;border-bottom:1px solid #eeeDE8;cursor:pointer;touch-action:manipulation}
+    .check-item label{display:flex;gap:12px;align-items:center;min-width:0;min-height:44px;flex:1;cursor:pointer}
     .check-label-input{width:100%;border:0;border-bottom:1px solid transparent;background:transparent;padding:2px 0;color:var(--text);outline:0}.check-label-input:focus{border-bottom-color:var(--dark)}
     .check-item-actions{display:flex;gap:4px;flex:none}.check-item-actions button{border:0;background:transparent;padding:5px;color:var(--muted);font-size:11px}
     .check-item:last-child{border:0}
@@ -188,7 +188,7 @@
       .grid.two,.grid.three,.currency-layout,.choice-grid,.planner-form{grid-template-columns:1fr}.planner-form .wide{grid-column:auto}
       .quick-grid{grid-template-columns:repeat(2,1fr)}
       #home-quick-tools{gap:7px}.home-quick-item>.quick{min-height:92px;padding:11px 8px}.home-quick-item .quick .app-icon{margin-bottom:12px}.home-quick-item .quick b{font-size:12px;line-height:1.3;overflow-wrap:anywhere}
-      #page-packing{padding-bottom:calc(96px + env(safe-area-inset-bottom))}.check-toolbar{position:static;top:auto;z-index:auto;background:transparent;backdrop-filter:none;padding:0 0 10px}.check-status{grid-template-columns:1fr}
+      #page-packing{padding-bottom:calc(180px + env(safe-area-inset-bottom))}.check-toolbar{position:static;top:auto;z-index:auto;background:transparent;backdrop-filter:none;padding:0 0 10px}.check-status{grid-template-columns:1fr}.check-group:last-child{margin-bottom:24px}
       .trip-form-grid{grid-template-columns:1fr}.trip-form-grid .wide{grid-column:auto}
       .hero{padding:26px 21px}.card{padding:17px}
       .guide-grid,.guide-grid.two,.guide-steps{grid-template-columns:1fr}.guide-banner{align-items:stretch;flex-direction:column}.guide-banner-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;width:100%}.guide-banner-actions .primary-btn{width:auto}
@@ -854,6 +854,7 @@ function renderChecklist(type,target){
  el.innerHTML=`<div class="check-toolbar"><div class="check-status"><div><b><span data-checked="${type}">0</span> / <span data-total="${type}">0</span>개 준비 완료</b><div class="bar" style="background:#deded7;margin-top:8px"><span data-progress="${type}" style="background:#171a17"></span></div></div><div class="check-group-tools"><button data-reset="${type}">전체 해제</button><button data-restore="${type}">기본 목록</button><button class="packing-home-btn" data-packing-home="${type}">저장하고 홈으로</button></div></div></div>`+
  groups.map((group,gi)=>`<section class="check-group"><div class="check-group-head"><span>${escapeHTML(group.label)}</span><div class="check-group-tools"><span data-count="${type}-${gi}"></span><button class="check-edit-btn" data-add-check="${gi}">+ 추가</button></div></div>${group.items.map(item=>`<div class="check-item"><label><input type="checkbox" aria-label="${escapeHTML(item.label)}" data-check="${type}" data-group="${gi}" data-id="${escapeHTML(item.id)}" ${saved[item.id]?"checked":""}><span class="check-label-text">${escapeHTML(item.label)}</span></label><div class="check-item-actions"><button data-edit-check="${escapeHTML(item.id)}" data-group-index="${gi}">수정</button><button data-delete-check="${escapeHTML(item.id)}" data-group-index="${gi}">삭제</button></div></div>`).join("")}</section>`).join("");
  el.querySelectorAll(`[data-check="${type}"]`).forEach(i=>i.addEventListener("change",()=>{const s=getSaved(type);s[i.dataset.id]=i.checked;writeJSON(storageKey(type),s);syncChecklist(type);const stats=packingStats(type),trip=findTrip(type),eventName=i.checked?"packing_item_checked":"packing_item_unchecked";trackEvent(eventName,tripAnalytics(trip,{feature:i.dataset.id,completion_percent:stats.pct}));trackEvent("readiness_updated",tripAnalytics(trip,{feature:"packing",completion_percent:readinessSummary(type).pct}));if(stats.pct===100)trackEvent("packing_completed",tripAnalytics(trip,{completion_percent:stats.pct}));scheduleCloudSave()}));
+ el.querySelectorAll(".check-item").forEach(row=>row.addEventListener("click",event=>{if(event.target.closest("label,button,input"))return;row.querySelector('input[type="checkbox"]')?.click()}));
  el.querySelector(`[data-reset="${type}"]`).onclick=()=>{if(confirm("모든 체크를 해제할까요?")){removeStored(storageKey(type));syncChecklist(type);trackEvent("packing_reset",tripAnalytics(findTrip(type),{completion_percent:0}));scheduleCloudSave()}};
  el.querySelector(`[data-restore="${type}"]`).onclick=()=>{if(confirm("추가·변경한 항목을 지우고 기본 준비물 목록으로 되돌릴까요?")){removeStored(checklistDefinitionKey(type));rerenderChecklist(type);scheduleCloudSave()}};
  el.querySelector(`[data-packing-home="${type}"]`).onclick=()=>{renderDashboard();scheduleCloudSave();go("home")};
