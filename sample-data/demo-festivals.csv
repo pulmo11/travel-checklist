@@ -1,0 +1,10 @@
+유형,여행명,일정명,이름,시작,종료,장소,출발지,도착지,국가코드,통화,이동수단,참여자,카테고리,메모
+여행,Mountain Echo Festival Trip 2027,,Mountain Echo Festival Trip,2027-09-10,2027-09-14,Denver,,,US,USD,,Demo Traveler,페스티벌 여행,Fictional Build Week demo trip
+페스티벌,Mountain Echo Festival Trip 2027,Mountain Echo Festival 2027,,2027-09-11,2027-09-13,Denver,,,US,USD,,,,Fictional festival
+교통,Mountain Echo Festival Trip 2027,Airport transfer,Demo Traveler,2027-09-10 09:00,2027-09-10 13:00,,Origin Airport,Destination Airport,,,비행기,,,Synthetic itinerary
+숙소,Mountain Echo Festival Trip 2027,,Demo Lodge,2027-09-10,2027-09-14,Denver,,,,USD,숙소,Demo Traveler,,Synthetic accommodation
+짐싸기,Mountain Echo Festival Trip 2027,,Passport,,,,,,,,,Demo Traveler,서류/결제,
+짐싸기,Mountain Echo Festival Trip 2027,,Payment card,,,,,,,,,Demo Traveler,서류/결제,
+짐싸기,Mountain Echo Festival Trip 2027,,Portable charger,,,,,,,,,Demo Traveler,가방/전자기기,Carry-on item
+짐싸기,Mountain Echo Festival Trip 2027,,Comfortable shoes,,,,,,,,,Demo Traveler,의류/신발,
+짐싸기,Mountain Echo Festival Trip 2027,,First-aid kit,,,,,,,,,Demo Traveler,의약품/세면용품,

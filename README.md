@@ -1,92 +1,163 @@
 # Festival Passport
 
-## 피드백 기능 설정
+> A mobile-first, local-first companion for planning festival trips, coordinating shared itineraries, and preserving personal festival history.
 
-- Supabase Dashboard의 **SQL Editor**에서 `SUPABASE_FEEDBACK.sql`을 한 번 실행합니다.
-- 이 스크립트는 INSERT 전용 `feedback` 테이블과 비공개 `feedback-images` Storage 버킷을 생성합니다.
-- 기존 `config.js`의 `supabaseUrl`과 `supabasePublishableKey`만 재사용하며 새 환경변수나 서비스 롤 키는 필요하지 않습니다.
-- 일반 사용자는 새 피드백과 이미지를 제출할 수만 있습니다. 목록 조회·수정·삭제와 비공개 이미지 다운로드는 허용되지 않으며, 관리자는 Supabase Dashboard에서 확인합니다.
+[Live Demo](https://pulmo11.github.io/travel-checklist/) · [Judge Guide](./JUDGE_GUIDE.md) · [Demo Data](./sample-data/demo-festivals.csv)
 
-### 새 피드백 이메일 알림
+## Demo Video
 
-피드백 저장과 이메일 알림은 `supabase/functions/notify-feedback` Edge Function에서 함께 처리합니다. 알림 주소는 공개 코드에 넣지 않고 Supabase secret으로 설정합니다.
+The submission video will be linked here after it is uploaded. The live demo and the English [Judge Guide](./JUDGE_GUIDE.md) are available now.
 
-1. [Resend](https://resend.com/)에 `illuvision@naver.com`으로 가입하고 API Key를 발급합니다.
-2. Supabase CLI에서 프로젝트를 연결한 뒤 아래 secret을 설정합니다.
+## The Problem
+
+Festival travelers often split flights, accommodation, packing lists, exchange rates, expenses, and group schedules across notes, spreadsheets, and messaging apps. The same information is repeatedly reformatted, while active travel plans and past festival memories become difficult to review together.
+
+## The Solution
+
+Festival Passport brings those workflows into one responsive web application. A traveler can create a festival trip, add transport and stays, customize a packing checklist, track currencies and costs, coordinate selected group itineraries, and view active and historical records on Festival World Map.
+
+The core experience works without an account and stores personal planning data in the current browser. Email login is optional and enables synchronization of supported personal data across devices.
+
+## Key Features
+
+- **Shared Trip Engine** — a common detail view for built-in and user-created festival trips.
+- **Transport and stays** — personal entries plus group-code-based shared transport and accommodation.
+- **Packing checklists** — trip-specific items with add, edit, delete, check, reset, and bulk-import workflows.
+- **Currency tools** — selectable currencies, reference exchange rates, and saved wallet/cash amounts.
+- **Trip budgets** — trip selection, expense entry, and currency-aware cost records.
+- **Festival World Map** — map, timeline, year, and country views for active trips and past festival records.
+- **Bulk data tools** — CSV/TSV import for trips, festivals, transport, stays, and packing; CSV/JSON archive import and export.
+- **Optional cloud sync** — email-link authentication and Supabase-backed synchronization.
+- **Feedback and documentation** — an in-app guide, service introduction, update history, and feedback form.
+
+## How It Works
+
+1. Create a trip with its festival, destination, travel dates, currency, and enabled tools.
+2. Add personal transport and accommodation, or connect a group code for shared entries.
+3. Prepare with a customizable packing checklist, currency holdings, and trip expenses.
+4. Review current and past festival records in Festival World Map.
+5. Optionally sign in by email to synchronize supported personal planning data across devices.
+
+## Architecture
+
+Festival Passport is a static GitHub Pages application with no build step.
+
+- `index.html` contains the SPA views, hash routing, trip engine, local planning tools, and client-side persistence.
+- `festival-records.js` and `festival-records.css` provide Festival World Map, archive import/export, filters, and record views.
+- Browser `localStorage` is the primary store for unsigned users.
+- Supabase provides optional email authentication, cloud synchronization, group itineraries, feedback storage, and realtime updates.
+- Leaflet and OpenStreetMap render the festival map.
+- Frankfurter supplies optional public reference exchange rates.
+- Google Analytics 4 receives allowlisted, non-personal interaction events only on the production GitHub Pages path.
+
+## How to Test
+
+For a concise English walkthrough, follow [JUDGE_GUIDE.md](./JUDGE_GUIDE.md).
+
+Quick path:
+
+1. Open the [live demo](https://pulmo11.github.io/travel-checklist/).
+2. Select **여행 (Trips)** and create or open a trip.
+3. Add transport or accommodation in the trip detail view.
+4. Select **짐싸기 (Packing)** and check or edit an item.
+5. Open **마이 (My Page)** and import the demo CSV.
+6. Open **Festival World Map** to inspect active and past records.
+7. Open **여행비 정산 (Trip Budget)** to add a sample expense.
+
+Login is not required for this core path. Use synthetic data when testing.
+
+## Sample Data
+
+[`sample-data/demo-festivals.csv`](./sample-data/demo-festivals.csv) contains a fictional festival trip with transport, a stay, and packing items. It follows the app's current bulk-trip import schema and contains no personal or booking information.
+
+To import it:
+
+1. Open **마이 (My Page)**.
+2. Select **여행 데이터 가져오기 (Import Travel Data)**.
+3. Upload the CSV file.
+4. Select **분석 및 미리보기 (Analyze and Preview)**.
+5. Review the rows, then save the selected items.
+6. Open **여행 (Trips)** or **Festival World Map** to view the result.
+
+Importing adds data to the current browser; it does not replace existing trips or checklists by default.
+
+## Built with Codex and GPT-5.6
+
+Codex implemented and refined the shared trip engine, bulk import workflow, responsive packing tools, real-time group itinerary synchronization, and Festival World Map. GPT-5.6 was used through Codex to inspect the evolving codebase, translate product requests into bounded implementation tasks, preserve backward compatibility, diagnose mobile interaction issues, and verify changes across responsive layouts.
+
+Codex accelerated:
+
+- conversion from festival-specific pages to a reusable trip engine;
+- CSV/TSV parsing, validation, preview, and import flows;
+- group transport and group stay synchronization;
+- mobile packing-list interaction fixes;
+- World Map archive, filtering, import/export, and location handling;
+- accessibility, analytics instrumentation, regression checks, and GitHub Pages deployment.
+
+The product owner made the final decisions about privacy, local-first storage, festival-specific information architecture, confirmation and recovery flows, the separation of active trips from historical records, which information may be shared with a group, and the visual direction of the service.
+
+Festival Passport does **not** call the OpenAI API at runtime. Codex and GPT-5.6 were development tools used to build and refine the application.
+
+## Build Week Development Timeline
+
+- **2026-07-18** — Public release, reusable trip workflows, bulk trip and packing import, guide and feedback support, trip budgets, group synchronization, favicon, and map interaction improvements.
+- **2026-07-19** — Visitor counter privacy adjustment, festival discovery and archive improvements, trip sharing and location fixes, iPad packing touch-target improvements, and serialized checklist cloud saves.
+- **2026-07-20** — Preview status, service history, and clearer Festival World Map statistics labels.
+- **2026-07-22** — Submission documentation, judge guide, license, and privacy-safe demo data.
+
+The repository commit history contains the implementation record for these changes. A representative Codex session ID must be supplied separately in the Build Week submission.
+
+## Technical Decisions
+
+- **Local-first core:** basic planning remains usable without registration.
+- **Optional synchronization:** cloud login extends the core workflow instead of blocking it.
+- **Backward-compatible persistence:** existing localStorage keys and stored trip data are preserved as features evolve.
+- **Shared records stay separate:** group transport and stays are not silently merged into private entries.
+- **Active and historical records differ:** planned travel keeps operational detail; past records use a lighter archive structure.
+- **Static deployment:** a no-build SPA keeps GitHub Pages deployment and local inspection simple.
+
+## Privacy and Data Storage
+
+- Without login, personal planning data is stored in the current browser's `localStorage`.
+- Clearing site data or using another browser does not carry unsigned local data over automatically.
+- Email login uses Supabase magic links and enables synchronization for the same account.
+- Group codes are separate from account synchronization and are used to retrieve shared group transport and stays.
+- Public analytics events are allowlisted and do not include names, addresses, booking numbers, notes, or expense amounts.
+- Feedback is submitted to Supabase; its optional email notification recipient is configured as a server-side secret, not in public client code.
+- Supabase RLS policies and setup scripts are included for deployment review. Do not place service-role keys in the client.
+
+For feedback notification deployment, use a private server-side setting such as:
 
 ```sh
-supabase secrets set RESEND_API_KEY=re_발급받은키 FEEDBACK_NOTIFICATION_EMAIL=illuvision@naver.com
+supabase secrets set RESEND_API_KEY=re_your_key FEEDBACK_NOTIFICATION_EMAIL=your-email@example.com
 ```
 
-3. 익명 사용자도 문의를 보낼 수 있도록 Edge Function을 배포합니다.
+## Known Limitations
+
+- Unsigned local data is browser-specific and can be lost if site data is cleared.
+- Email delivery, cloud sync, group sharing, feedback notifications, geocoding, map tiles, and exchange rates depend on their external services and network availability.
+- Imported venue names may require manual location correction when geocoding cannot identify a precise place.
+- The interface is primarily Korean; this repository provides an English judge guide rather than a full translated UI.
+- Festival Passport is a preview service, so some workflows and data structures may still change.
+
+## Local Setup
+
+No package installation or build step is required.
 
 ```sh
-supabase functions deploy notify-feedback --no-verify-jwt
-```
-
-Resend의 기본 발신 주소 `onboarding@resend.dev`를 사용합니다. Resend 계정 이메일과 알림 수신 주소가 다르거나 자체 발신 주소를 사용하려면 Resend에서 도메인 인증이 필요합니다.
-
-## Trip Engine Phase A
-
-- 모든 기본·사용자 추가 여행은 `#trip/{tripId}` 공통 상세 화면을 사용합니다.
-- 공통 탭: 개요, 일정, 교통, 숙소, 짐싸기, 비용
-- 기존 `#fuji`, `#sonic` 주소는 같은 여행의 공통 상세 화면으로 연결됩니다.
-- 후지록의 기존 개인 일정·숙소·짐싸기 데이터와 localStorage 키는 그대로 유지됩니다.
-- 새 여행 데이터는 `festival-passport-trip-{tripId}-*-v1` 형식으로 여행별 분리 저장됩니다.
-- Supabase 그룹을 여행별로 분리하려면 `SUPABASE_TRIP_ENGINE.sql`을 한 번 실행합니다. 기존 그룹은 자동으로 `fuji`에 귀속되며 삭제되지 않습니다.
-- 하단 메뉴는 홈, 여행, 짐싸기, 환전, 마이페이지로 구성됩니다. 마이페이지에서 로그인·동기화·저장 현황·초기화를 관리합니다.
-- 기본 후지록·섬머소닉 도쿄 여행은 목록에서 숨기거나 다시 복원할 수 있으며, 준비도는 남아 있는 가장 가까운 여행으로 자동 전환됩니다.
-- 홈의 Festival World Map에서 등록한 여행을 국가·도시별로 확인하고 공통 여행 상세 화면으로 이동할 수 있습니다. 좌표가 없는 여행도 지도 아래 목적지 목록에 유지됩니다.
-- World Map은 현재·예정 여행과 과거 페스티벌 기록을 함께 표시하며 지도, 시간순, 연도별, 국가별 보기와 검색·필터를 제공합니다.
-- 과거 기록은 직접 추가하거나 완료된 여행에서 변환할 수 있습니다. 변환 시 기존 여행을 유지하거나 상세 데이터까지 삭제하고 기록만 남길 수 있습니다.
-- 마이페이지에서 TSV·CSV·JSON 대량 가져오기와 CSV·JSON 내보내기·백업을 사용할 수 있습니다. 가져오기는 저장 전 열 매핑, 오류, 중복, 위치 미등록 항목을 미리 보여줍니다.
-- 홈은 가장 가까운 여행의 준비도와 다음 할 일을 한 카드에 보여줍니다.
-
-앞으로 갈 페스티벌 여행의 일정, 준비 상태, 준비물, 환전 및 여행비를 관리하는 반응형 정적 웹앱입니다. 사이트는 공개로 열리며, 개인 일정은 브라우저에 저장하고 친구 일정은 Supabase 그룹코드로 공유합니다.
-
-## 로컬에서 실행
-
-별도 빌드나 패키지 설치가 필요하지 않습니다. 환율 API 요청을 정상적으로 테스트하려면 파일을 직접 열기보다 간단한 로컬 서버를 사용하세요.
-
-```sh
+git clone https://github.com/pulmo11/travel-checklist.git
+cd travel-checklist
 python3 -m http.server 8000
 ```
 
-브라우저에서 `http://localhost:8000`을 엽니다.
+Open `http://localhost:8000/`.
 
-## GitHub Pages 배포
+`config.js` contains the public Supabase project URL and publishable key used by the browser client. Never add a service-role key, Resend API key, or other server secret to this file.
 
-1. 변경 파일을 `main` 브랜치에 반영합니다.
-2. 저장소의 **Settings → Pages**에서 Source를 **Deploy from a branch**로 선택합니다.
-3. Branch는 `main`, 폴더는 `/(root)`로 설정합니다.
-4. 배포가 끝나면 `https://pulmo11.github.io/travel-checklist/`에서 확인합니다.
+## Deployment
 
-앱은 `index.html`을 진입점으로 사용하며 상대 경로로 `config.js`와 Supabase 라이브러리를 불러옵니다.
+GitHub Pages serves the `main` branch from the repository root. `index.html` is the entry point and all project assets use paths compatible with `/travel-checklist/`.
 
-## 데이터 저장
+## License
 
-- 준비물 체크 상태와 사용자 수정 금액은 브라우저 `localStorage`에 저장됩니다.
-- 후지록과 섬머소닉 체크 상태는 각각 `travel-companion-fuji-checks`, `travel-companion-sonic-checks` 키를 계속 사용합니다.
-- 개인 항공·교통 일정은 `travel-companion-personal-itinerary-v1` 키에 저장됩니다.
-- 여행별 통합 준비 상태는 `festival-passport-readiness-v1` 키에 저장됩니다.
-- 홈 준비도는 개인 교통 일정, 숙박 계획, 준비물 체크 상태를 읽어 자동으로 갱신됩니다.
-- 사용자가 추가한 국내외 페스티벌 여행은 `festival-passport-custom-trips-v1` 키에 저장됩니다.
-- 과거 페스티벌 여행은 현재 여행과 분리된 `festival-passport-past-festivals-v1` 키에 저장됩니다.
-- 마이페이지의 초기화 버튼은 확인 후 개인 일정·숙소·준비도·짐싸기·환전·여행비·추가 여행을 초기 상태로 되돌립니다. 로그인 중이면 초기화 상태도 클라우드에 동기화됩니다.
-- 환율 기능 사용 여부는 `festival-passport-exchange-settings-v1` 키에 저장되며 기본값은 OFF입니다.
-- 환전 화면은 JPY·USD·GBP·EUR를 지원하며 선택 통화와 통화별 트래블월렛·현금 값을 각각 저장합니다. 기존 엔화 데이터는 JPY 항목으로 자동 이전됩니다.
-- 로그인하지 않은 개인 일정은 브라우저 데이터를 삭제하면 함께 삭제됩니다.
-- 환율 기능을 켠 경우에만 Frankfurter v2의 선택 통화/원화 공개 기준환율을 요청하며, 조회 실패 시 마지막 정상 조회값을 표시합니다.
-
-## Supabase 기기 간 동기화
-
-1. Supabase Dashboard의 **SQL Editor**에서 `SUPABASE_SETUP.sql`을 실행합니다.
-2. 이어서 `SUPABASE_GROUPS.sql`을 실행합니다.
-3. **Authentication → Providers → Anonymous Sign-Ins**를 활성화합니다.
-4. **Authentication → URL Configuration**에서 Site URL을 실제 GitHub Pages 주소로 설정합니다.
-5. Redirect URLs에 실제 GitHub Pages 주소와 필요한 로컬 테스트 주소를 추가합니다.
-6. `config.js`에는 Project URL과 publishable key만 둡니다. secret 또는 service role key는 프론트엔드에 추가하지 않습니다.
-
-같은 이메일의 로그인 링크로 인증한 기기끼리 준비물, 보유 엔화, 여행비 데이터가 동기화됩니다. 최초 로그인 시 서버 데이터가 없으면 기존 localStorage 데이터를 서버로 이전하며, 이후에도 오프라인 표시를 위해 localStorage를 유지합니다.
-
-그룹 일정은 추측하기 어려운 자동 생성 코드를 사용합니다. 코드 확인은 Supabase 함수에서 처리하며, RLS가 가입한 그룹의 데이터만 읽도록 제한합니다. 기존 `private_data`는 로그인한 소유자가 첫 그룹을 만들 때 해당 그룹 일정으로 복사됩니다.
+This project is available under the [MIT License](./LICENSE).
