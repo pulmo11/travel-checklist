@@ -31,7 +31,7 @@ create or replace function public.create_trip_group(p_name text, p_trip_id text)
 returns table(group_id uuid, invite_code text)
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   created_id uuid;
@@ -46,13 +46,26 @@ begin
   end if;
 
   created_code := upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
-  insert into public.travel_groups(name, owner_id, invite_code, trip_id)
-  values (trim(p_name), auth.uid(), created_code, trim(p_trip_id))
+  insert into public.travel_groups(name, owner_id, trip_id)
+  values (trim(p_name), auth.uid(), trim(p_trip_id))
   returning id into created_id;
 
-  insert into public.travel_group_members(group_id, user_id)
-  values (created_id, auth.uid())
-  on conflict do nothing;
+  insert into public.travel_group_members(group_id, user_id, role)
+  values (created_id, auth.uid(), 'owner')
+  on conflict on constraint travel_group_members_pkey
+  do update set role = 'owner';
+
+  insert into public.travel_group_invites(group_id, code_hash, enabled)
+  values (
+    created_id,
+    encode(digest(lower(created_code), 'sha256'), 'hex'),
+    true
+  )
+  on conflict on constraint travel_group_invites_pkey
+  do update set
+    code_hash = excluded.code_hash,
+    enabled = true,
+    created_at = now();
 
   return query select created_id, created_code;
 end;
