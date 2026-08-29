@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
+import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ALLOWED_TYPES = new Set(["bug", "feature", "question", "other"]);
 const TYPE_LABELS: Record<string, string> = {
@@ -26,7 +27,7 @@ function escapeHtml(value: unknown) {
 }
 
 export default {
-  fetch: withSupabase({ auth: ["publishable", "user"] }, async (request, { supabase }) => {
+  fetch: withSupabase({ auth: ["publishable", "user"] }, async (request, { supabaseAdmin }) => {
   if (request.method === "OPTIONS") {
     return new Response("ok", {
       headers: {
@@ -39,6 +40,44 @@ export default {
 
   try {
     const payload = await request.json();
+    const accessToken = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") ?? "";
+    const { data: authData } = accessToken
+      ? await supabaseAdmin.auth.getUser(accessToken)
+      : { data: { user: null } };
+    const authenticatedUserId = authData.user?.id ?? null;
+    const userClient = authenticatedUserId
+      ? createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+        {
+          global: { headers: { Authorization: `Bearer ${accessToken}` } },
+          auth: { persistSession: false, autoRefreshToken: false },
+        },
+      )
+      : null;
+    if (payload?.action === "cleanup_images") {
+      const requestedPaths = Array.isArray(payload.screenshot_paths)
+        ? payload.screenshot_paths.filter((path: unknown): path is string =>
+          typeof path === "string" && /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/.test(path)
+        ).slice(0, 3)
+        : [];
+      if (!authenticatedUserId || !requestedPaths.length) {
+        return json({ cleaned: true, count: 0 });
+      }
+      const { data: ownedPaths, error: lookupError } = await userClient!.rpc(
+        "get_owned_unlinked_feedback_image_paths",
+        { p_paths: requestedPaths },
+      );
+      if (lookupError) return json({ error: "cleanup_lookup_failed" }, 400);
+      const removable = Array.isArray(ownedPaths) ? ownedPaths : [];
+      if (removable.length) {
+        const { error: removeError } = await supabaseAdmin.storage
+          .from("feedback-images")
+          .remove(removable);
+        if (removeError) return json({ error: "cleanup_failed" }, 500);
+      }
+      return json({ cleaned: true, count: removable.length });
+    }
     if (
       !ALLOWED_TYPES.has(payload?.type) ||
       typeof payload?.title !== "string" || payload.title.trim().length < 2 || payload.title.length > 100 ||
@@ -47,7 +86,14 @@ export default {
       !Array.isArray(payload?.screenshot_paths) || payload.screenshot_paths.length > 3
     ) return json({ error: "invalid_input" }, 400);
 
-    const { error: insertError } = await supabase.from("feedback").insert(payload);
+    if (
+      (payload.is_logged_in === true && (!authenticatedUserId || payload.user_id !== authenticatedUserId)) ||
+      (payload.is_logged_in !== true && payload.user_id !== null)
+    ) return json({ error: "invalid_identity" }, 403);
+
+    // Identity is verified above. Use the server client so Auth context forwarding
+    // differences cannot turn a valid signed-in submission into an RLS failure.
+    const { error: insertError } = await supabaseAdmin.from("feedback").insert(payload);
     if (insertError) {
       console.error("Feedback insert failed", insertError.code);
       return json({ error: "save_failed" }, 400);
