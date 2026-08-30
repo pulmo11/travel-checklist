@@ -44,3 +44,29 @@ Production deployment completion flow:
 8. Confirm the matching Recent Updates entry is visible in production.
 
 The source of truth for public release notes is the single `SERVICE_UPDATES` array in `index.html`. Do not duplicate the same public update text elsewhere unless the product explicitly requires another presentation.
+
+## Festival / Concert Update Policy
+
+Researching new Festival / Concert schedules or changes to existing schedules, and deciding whether to register them, must not be automated by code. Only events explicitly provided and approved by the user may be added to the site data.
+
+When handling a Festival / Concert update request:
+
+1. Inspect the current production data and check for duplicates.
+2. Apply only the entries explicitly approved by the user.
+3. Confirm that the supplied date, venue, status, official URL, and other event data do not conflict with the existing structure.
+4. Apply the change to a demo or development environment first.
+5. QA the existing Festival / Concert features and trip-add flow.
+6. Report the demo URL and a clear summary of the changes to the user.
+7. Do not merge to `main` or deploy to GitHub Pages production until the user explicitly approves the production deployment.
+8. Apply the change to production only after that explicit approval.
+9. When deploying to production, also follow the Production Release Notes policy above.
+
+Prohibited:
+
+- selecting or adding new Festival / Concert events at Codex's discretion;
+- adding events based only on web search results without user approval;
+- publishing automated crawler results directly to production;
+- automatically approving candidates based on AI judgment;
+- deploying to production without explicit user approval.
+
+The site owner always retains final authority over Festival / Concert production data.
