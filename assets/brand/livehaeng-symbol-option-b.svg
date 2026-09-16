@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title">
+  <title id="title">LIVE dot 아이콘 시안</title>
+  <rect width="96" height="96" rx="28" fill="#1769e0"/>
+  <path d="M29 25v44h32" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="72" cy="68" r="7" fill="#86cdfa"/>
+</svg>
