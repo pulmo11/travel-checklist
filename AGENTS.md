@@ -70,3 +70,7 @@ Prohibited:
 - deploying to production without explicit user approval.
 
 The site owner always retains final authority over Festival / Concert production data.
+
+## Rebranding Data Compatibility
+
+Rebranding work must preserve existing user data keys and production sync behavior. Do not rename localStorage keys, Supabase fields or tables, analytics identifiers, route hashes, or stable data IDs solely to match a new brand name. User-visible product names and copy may change, but existing stored data, account sync, shared groups, and historical records must remain backward compatible.
