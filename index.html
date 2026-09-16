@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#151815">
-  <meta name="description" content="페스티벌 여행 준비를 한곳에서 관리하는 Festival Passport">
-  <title>Festival Passport</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#102a4c">
+  <meta name="description" content="콘서트와 페스티벌을 보러 가는 여행 준비 서비스, 라이브행">
+  <title>라이브행 — 이 공연, 원정각.</title>
+  <link rel="icon" href="./assets/brand/livehaeng-icon.svg" type="image/svg+xml">
   <link rel="icon" href="./favicon.ico" sizes="any">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180">
   <script>
@@ -18,7 +18,8 @@
   <style>
     :root{
       --bg:#f4f3ee;--surface:#fff;--surface2:#ecebe5;--text:#171917;--muted:#6d706a;
-      --line:#deded7;--dark:#171a17;--green:#427257;--orange:#cf623d;--blue:#446f9a;
+      --line:#deded7;--dark:#171a17;--green:#427257;--orange:#cf623d;--blue:#1769e0;
+      --brand-blue:#1769e0;--brand-navy:#102a4c;--brand-sky:#86cdfa;--accent:#1769e0;
       --radius:22px;--shadow:0 12px 34px rgba(27,29,25,.08);
     }
     *{box-sizing:border-box}
@@ -30,9 +31,10 @@
     .app{min-height:100dvh;padding-bottom:92px}
     .topbar{position:sticky;top:0;z-index:30;background:rgba(244,243,238,.88);backdrop-filter:blur(16px);border-bottom:1px solid rgba(0,0,0,.04)}
     .topbar-inner{max-width:1180px;margin:auto;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px}
-    .brand{border:0;background:none;padding:0;text-align:left}
-    .brand strong{display:block;font-size:17px;letter-spacing:-.03em}
-    .brand span{font-size:11px;color:var(--muted);letter-spacing:.12em}
+    .brand{display:flex;align-items:center;gap:9px;border:0;background:none;padding:0;text-align:left;color:var(--brand-navy)}
+    .brand-mark{position:relative;display:grid;place-items:center;width:31px;height:31px;border-radius:11px;background:var(--brand-blue);color:#fff;font-size:15px;font-weight:900;transform:rotate(-5deg)}
+    .brand-mark:after{content:"";position:absolute;width:12px;height:6px;right:-6px;bottom:1px;border-bottom:2px solid var(--brand-sky);border-radius:50%;transform:rotate(-20deg)}
+    .brand-copy{display:block}.brand strong{display:block;font-size:19px;line-height:1.05;letter-spacing:-.055em}.brand span{font-size:9px;color:var(--muted);letter-spacing:.14em}
     .sync{font-size:12px;color:var(--muted);white-space:nowrap}
     .sync-btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 11px;font-size:12px;color:var(--text)}
     .auth-row{display:flex;gap:8px;margin-top:14px}.auth-row input{min-width:0;flex:1;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff}
@@ -47,11 +49,12 @@
     .page{display:none;animation:fade .22s ease}
     .page.active{display:block}
     @keyframes fade{from{opacity:.3;transform:translateY(5px)}}
-    .hero{border-radius:30px;background:var(--dark);color:#fff;padding:30px 25px;box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;position:relative}
-    .hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;right:-90px;top:-90px;background:rgba(255,255,255,.08)}
-    .hero-kicker{font-size:12px;letter-spacing:.12em;color:#c8cec6;margin:0 0 10px}
-    .hero h1{font-size:clamp(31px,7vw,52px);line-height:1.05;margin:0;letter-spacing:-.055em}
-    .hero p{max-width:620px;margin:16px 0 0;color:#d4d8d2;font-size:14px}
+    .hero{border-radius:30px;background:linear-gradient(135deg,var(--brand-navy),#143d70 68%,#1769e0);color:#fff;padding:36px 30px;box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;position:relative}
+    .hero:before{content:"";position:absolute;width:260px;height:128px;right:-20px;top:18px;border:2px solid rgba(134,205,250,.32);border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;transform:rotate(-13deg)}
+    .hero:after{content:"✦";position:absolute;right:40px;top:31px;color:var(--brand-sky);font-size:22px;transform:rotate(12deg)}
+    .hero>*{position:relative;z-index:1}.hero-kicker{font-size:11px;font-weight:800;letter-spacing:.16em;color:#a9d9ff;margin:0 0 16px}
+    .hero h1{font-size:clamp(38px,8vw,66px);line-height:.98;margin:0;letter-spacing:-.07em}.hero h1 span{display:block;margin-top:13px;font-size:clamp(24px,4vw,38px);line-height:1.1;letter-spacing:-.055em}
+    .hero p{max-width:620px;margin:15px 0 0;color:#daeaff;font-size:14px;line-height:1.65}.hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:23px}.hero-actions button{min-height:46px;border:1px solid rgba(255,255,255,.28);border-radius:13px;padding:0 16px;font-weight:800}.hero-actions .hero-primary{background:#fff;color:var(--brand-navy)}.hero-actions .hero-secondary{background:rgba(255,255,255,.08);color:#fff}
     .primary-btn{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:12px;padding:10px 13px;background:var(--dark);color:#fff;text-decoration:none;font-weight:700}
     .action-list{display:grid;margin-top:10px}.action-item{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:transparent;padding:12px 0;text-align:left;color:var(--text)}.action-item:first-child{border-top:0}.action-item .action-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:9px;background:var(--surface2)}.action-item small{display:block;margin-top:3px;color:var(--muted)}.action-state{display:inline-flex;align-items:center;min-height:25px;padding:4px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);font-size:10px;font-style:normal;font-weight:750;white-space:nowrap}
     .readiness-head{display:flex;align-items:end;justify-content:space-between;gap:12px}.readiness-score{font-size:34px;font-weight:780;letter-spacing:-.05em}.readiness-list{display:grid;margin-top:12px}.readiness-row{display:grid;grid-template-columns:1fr minmax(115px,auto);align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}.readiness-row:first-child{border-top:0}.readiness-row b{font-size:13px}.readiness-row select{width:100%;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fff;font-size:12px}.readiness-status{font-size:12px;color:var(--muted);text-align:right}.readiness-status strong{display:block;color:var(--text);font-size:12px}.readiness-status small{display:block;margin-top:2px}.packing-home-btn{border:0;background:var(--dark)!important;color:#fff;border-radius:10px;padding:8px 10px;font-size:12px}
@@ -214,7 +217,7 @@
 <div class="app">
   <header class="topbar">
     <div class="topbar-inner">
-      <button class="brand" data-go="home"><strong>Festival Passport</strong><span>TRAVEL COMPANION</span></button>
+      <button class="brand" data-go="home" aria-label="라이브행 홈"><span class="brand-mark" aria-hidden="true">행</span><span class="brand-copy"><strong>라이브행</strong><span>LIVE TRAVEL PLANNER</span></span></button>
       <button class="sync-btn" id="sync-indicator" aria-haspopup="dialog">이 기기에 저장 중</button>
     </div>
   </header>
@@ -222,19 +225,20 @@
   <main>
     <section class="page active" id="page-home">
       <div class="hero">
-        <p class="hero-kicker">YOUR FESTIVAL TRAVEL COMPANION</p>
-        <h1>Festival<br>Passport</h1>
-        <p>페스티벌 여행 준비를 한곳에서</p>
+        <p class="hero-kicker">LIVE TRAVEL PLANNER</p>
+        <h1>라이브행<span>이 공연, 원정각.</span></h1>
+        <p>콘서트와 페스티벌을 보러 가는 여행 준비 서비스.<br>티켓팅부터 숙소, 교통, 짐싸기, 기록까지 한 번에 준비하세요.</p>
+        <div class="hero-actions"><button type="button" class="hero-primary" data-livehaeng-discover>공연·페스티벌 찾기</button><button type="button" class="hero-secondary" data-livehaeng-trips>내 여행 보기</button></div>
       </div>
       <aside class="guide-banner" id="guide-banner" hidden aria-labelledby="guide-banner-title">
-        <div><strong id="guide-banner-title">Festival Passport가 처음인가요?</strong><p>여행 등록과 일행 공유 방법을 확인하고, 오류나 개선 의견이 있다면 알려주세요.</p></div>
+        <div><strong id="guide-banner-title">라이브행이 처음인가요?</strong><p>공연 여행 등록과 일행 공유 방법을 확인하고, 오류나 개선 의견이 있다면 알려주세요.</p></div>
         <div class="guide-banner-actions"><button type="button" class="primary-btn" id="guide-banner-open">사용 가이드</button><button type="button" class="secondary-btn" data-feedback-open="home-banner">오류·의견 보내기</button><button type="button" class="guide-banner-close" id="guide-banner-dismiss" aria-label="처음 사용 안내 닫기">×</button></div>
       </aside>
-      <aside class="preview-status" aria-label="서비스 운영 상태"><span class="preview-status-badge">PREVIEW</span><p>Festival Passport는 현재 프리뷰 버전입니다. 일부 기능과 데이터 구조가 변경될 수 있습니다.</p><a href="#about">서비스 소개</a></aside>
+      <aside class="preview-status" aria-label="서비스 운영 상태"><span class="preview-status-badge">PREVIEW</span><p>라이브행은 현재 프리뷰 버전입니다. 일부 기능과 데이터 구조가 변경될 수 있습니다.</p><a href="#about">서비스 소개</a></aside>
       <div class="home-edit-bar"><button type="button" id="home-edit-toggle" aria-label="홈 화면 편집 시작">홈 편집</button></div>
       <div id="home-layout-sections">
         <section class="home-layout-section" data-home-section="nearestTrip" aria-label="가장 가까운 여행 섹션">
-          <div class="section-title"><h2>가장 가까운 여행</h2><p>다음 페스티벌 준비 현황</p></div>
+          <div class="section-title"><h2>가장 가까운 여행</h2><p>다음 라이브 준비 현황</p></div>
           <div id="nearest-trip-card"></div>
         </section>
         <section class="home-layout-section" data-home-section="upcomingTrips" aria-label="나머지 예정 여행 섹션">
@@ -244,7 +248,7 @@
         <section class="home-layout-section" data-home-section="quickTools" aria-label="빠른 도구 섹션">
           <div class="section-title"><h2>빠른 도구</h2><p>기록과 비용 관리</p></div>
           <div class="quick-grid" id="home-quick-tools">
-            <div class="home-quick-item" data-home-tool="worldmap"><button class="quick" data-go="worldmap"><span data-tool-icon="map-pinned"></span><b>Festival World Map</b></button></div>
+            <div class="home-quick-item" data-home-tool="worldmap"><button class="quick" data-go="worldmap"><span data-tool-icon="map-pinned"></span><b>라이브맵</b></button></div>
             <div class="home-quick-item" data-home-tool="budget"><button class="quick" data-go="budget"><span data-tool-icon="receipt"></span><b>여행비 정산</b></button></div>
             <div class="home-quick-item" data-home-tool="packing"><button class="quick" data-go="packing"><span data-tool-icon="luggage"></span><b>짐싸기</b></button></div>
             <div class="home-quick-item" data-home-tool="currency"><button class="quick" data-go="currency"><span data-tool-icon="wallet"></span><b>환전</b></button></div>
@@ -447,13 +451,13 @@
       <div class="grid two" id="recommended-concerts" style="margin-bottom:22px"></div>
       <div class="section-title" style="margin-top:3px"><h2 style="font-size:19px">일정 발표 대기 중</h2><p>공식 날짜가 나오면 인기 페스티벌 목록에 반영됩니다.</p></div>
       <div class="grid two" id="kr-festival-tbd" style="margin-bottom:22px"></div>
-      <article class="card" style="margin-top:4px"><h3 style="margin:0 0 6px">지난 페스티벌도 확인해보세요</h3><p class="sub" style="margin:0 0 14px">종료된 여행은 Festival World Map의 지난 기록에 자동으로 표시됩니다.</p><button class="secondary-btn" data-go="worldmap">Festival World Map 바로가기</button></article>
+      <article class="card" style="margin-top:4px"><h3 style="margin:0 0 6px">지난 라이브도 확인해보세요</h3><p class="sub" style="margin:0 0 14px">종료된 공연·페스티벌 여행은 라이브맵의 지난 기록에 자동으로 표시됩니다.</p><button class="secondary-btn" data-go="worldmap">라이브맵 바로가기</button></article>
     </section>
 
     <section class="page" id="page-worldmap">
-      <div class="section-title" style="margin-top:3px"><h2>Festival World Map</h2><p>등록한 여행의 국가와 도시</p></div>
-      <article class="card"><div id="festival-world-map" class="world-map" aria-label="페스티벌 여행 세계 지도"></div><p class="sub" id="world-map-status">여행 위치를 지도에 표시하는 중입니다.</p></article>
-      <div class="section-title"><h2>My Festival Destinations</h2><p id="world-map-count">0개 여행</p></div>
+      <div class="section-title" style="margin-top:3px"><h2>라이브맵</h2><p>내가 다녀온 무대와 앞으로 갈 무대</p></div>
+      <article class="card"><div id="festival-world-map" class="world-map" aria-label="공연과 페스티벌 여행 지도"></div><p class="sub" id="world-map-status">라이브 여행 위치를 지도에 표시하는 중입니다.</p></article>
+      <div class="section-title"><h2>My Live Destinations</h2><p id="world-map-count">0개 여행</p></div>
       <div class="world-map-list" id="world-map-list"></div>
       <div class="section-title" style="margin-top:28px"><h2 class="past-festival-title" style="font-size:19px">지난 페스티벌</h2><p>종료된 행사를 지난 기록으로 추가해 지도에서 확인하세요</p></div>
       <div class="grid two" id="kr-festival-past" style="margin-bottom:22px"></div>
@@ -467,9 +471,9 @@
 
     <section class="page guide-page" id="page-guide">
       <article class="card guide-hero">
-        <h1>Festival Passport 시작하기</h1>
-        <p>페스티벌 여행의 일정부터 짐싸기, 환전과 비용 정산까지 한곳에서 관리하세요.</p>
-        <p>처음 여행을 등록하는 방법과 일행과 함께 사용하는 방법을 빠르게 확인할 수 있습니다.</p>
+        <h1>라이브행 시작하기</h1>
+        <p>콘서트와 페스티벌을 보러 가는 여행의 일정부터 짐싸기, 환전과 비용 정산까지 한곳에서 관리하세요.</p>
+        <p>보고 싶은 무대까지 떠날 준비와 일행과 함께 사용하는 방법을 빠르게 확인할 수 있습니다.</p>
         <div class="guide-actions"><button type="button" class="primary-btn" data-guide-action="new-trip" data-guide-source="hero">새 여행 만들기</button><button type="button" class="secondary-btn" data-guide-action="import" data-guide-source="hero">여행 데이터 가져오기</button></div>
       </article>
 
@@ -477,7 +481,7 @@
         <article class="card guide-card guide-step"><h3>여행 만들기</h3><p>여행명, 국가, 도시, 행사와 여행 기간을 등록합니다.</p></article>
         <article class="card guide-card guide-step"><h3>일정 채우기</h3><p>교통과 숙소를 직접 등록하거나 일행과 공유할 그룹 일정을 만듭니다.</p></article>
         <article class="card guide-card guide-step"><h3>여행 준비하기</h3><p>짐싸기, 환전과 여행비 정보를 관리합니다.</p></article>
-        <article class="card guide-card guide-step"><h3>여행 기록 남기기</h3><p>등록한 여행을 Festival World Map과 여행 목록에서 확인합니다.</p></article>
+        <article class="card guide-card guide-step"><h3>여행 기록 남기기</h3><p>등록한 공연·페스티벌 여행을 라이브맵과 여행 목록에서 확인합니다.</p></article>
       </div></section>
 
       <section class="guide-section" aria-labelledby="guide-features-title"><h2 id="guide-features-title">주요 기능</h2><div class="guide-grid">
@@ -487,7 +491,7 @@
         <article class="card guide-card"><h3>짐싸기 체크리스트</h3><p>여행별 준비물을 한 번에 추가하고 순서 변경·선택 삭제하며 완료 상태를 저장합니다.</p><button class="secondary-btn" data-guide-action="packing" data-guide-source="feature">바로가기</button></article>
         <article class="card guide-card"><h3>환전</h3><p>기준 통화를 선택하고 환율, 보유 외화와 현금 정보를 저장합니다.</p><button class="secondary-btn" data-guide-action="currency" data-guide-source="feature">바로가기</button></article>
         <article class="card guide-card"><h3>여행비 정산</h3><p>비용 항목과 금액을 기록하고 정산 현황을 확인합니다.</p><button class="secondary-btn" data-guide-action="budget" data-guide-source="feature">바로가기</button></article>
-        <article class="card guide-card"><h3>Festival World Map</h3><p>등록한 여행과 과거 페스티벌 기록을 국가와 도시 기준으로 확인합니다.</p><button class="secondary-btn" data-guide-action="worldmap" data-guide-source="feature">바로가기</button></article>
+        <article class="card guide-card"><h3>라이브맵</h3><p>등록한 여행과 과거 공연·페스티벌 기록을 국가와 도시 기준으로 확인합니다.</p><button class="secondary-btn" data-guide-action="worldmap" data-guide-source="feature">바로가기</button></article>
         <article class="card guide-card"><h3>여행 데이터 일괄등록</h3><p>표 붙여넣기 또는 CSV로 여행, 일정과 준비물을 한 번에 추가합니다.</p><button class="secondary-btn" data-guide-action="import" data-guide-source="feature">바로가기</button></article>
         <article class="card guide-card"><h3>로그인·동기화</h3><p>Google·Kakao 또는 이메일로 로그인해 같은 계정의 준비 데이터를 다른 기기와 맞춥니다.</p><button class="secondary-btn" data-guide-action="sync" data-guide-source="feature">바로가기</button></article>
       </div></section>
@@ -511,7 +515,7 @@
         <details data-guide-faq="method"><summary>직접 등록과 일괄등록 중 무엇을 사용해야 하나요?</summary><p>한두 개 여행은 직접 등록이 간단합니다. 과거 기록이나 여러 일정이 있다면 표 또는 CSV 일괄등록이 빠릅니다.</p></details>
         <details data-guide-faq="sharing"><summary>개인 일정과 그룹 일정은 무엇이 다른가요?</summary><p>개인 일정은 내 준비 데이터에 저장되고, 그룹 일정은 그룹코드로 연결된 공유 데이터입니다. 개인 교통은 공유 버튼을 눌러야 그룹에 별도로 등록됩니다.</p></details>
         <details data-guide-faq="local-save"><summary>로그인하지 않아도 데이터가 저장되나요?</summary><p>네. 현재 브라우저의 로컬 저장소에 저장됩니다. 브라우저 데이터를 지우거나 다른 기기를 사용하면 자동으로 이어지지 않습니다.</p></details>
-        <details data-guide-faq="other-device"><summary>다른 기기에서도 같은 데이터를 볼 수 있나요?</summary><p>같은 Festival Passport 계정으로 로그인하고 동기화하면 개인 준비 데이터를 다른 기기에서 불러올 수 있습니다. 그룹 일정은 해당 그룹코드도 연결해야 합니다.</p></details>
+        <details data-guide-faq="other-device"><summary>다른 기기에서도 같은 데이터를 볼 수 있나요?</summary><p>같은 라이브행 계정으로 로그인하고 동기화하면 개인 준비 데이터를 다른 기기에서 불러올 수 있습니다. 그룹 일정은 해당 그룹코드도 연결해야 합니다.</p></details>
         <details data-guide-faq="edit-import"><summary>일괄등록한 내용도 나중에 수정할 수 있나요?</summary><p>등록 후 각 여행 화면의 기존 관리 기능을 사용합니다. 숙소와 준비물은 수정할 수 있고, 수정 버튼이 없는 교통 항목은 삭제 후 다시 등록해야 할 수 있습니다.</p></details>
         <details data-guide-faq="currency"><summary>여행마다 다른 통화를 사용할 수 있나요?</summary><p>일괄등록한 여행에는 ISO 통화코드가 함께 저장됩니다. 환전 화면에서는 현재 사용할 기준 통화를 선택해 저장하고 필요할 때 변경합니다.</p></details>
         <details data-guide-faq="packing"><summary>짐싸기 완료 상태도 저장되나요?</summary><p>네. 여행별 체크 상태가 현재 브라우저에 저장되고, 로그인한 경우 준비 데이터 동기화 대상에 포함됩니다.</p></details>
@@ -525,13 +529,13 @@
 
     <section class="page about-page" id="page-about">
       <article class="card about-hero">
-        <p class="about-kicker">ABOUT FESTIVAL PASSPORT</p>
-        <h1>Festival Passport 소개</h1>
+        <p class="about-kicker">ABOUT LIVEHAENG</p>
+        <h1>라이브행 소개</h1>
         <div class="about-copy">
-          <p>Festival Passport는 페스티벌과 공연을 중심으로 여행 일정, 교통, 숙소, 준비물, 비용과 지난 여행 기록을 한곳에서 관리할 수 있는 여행 도구입니다.</p>
-          <p>해외 페스티벌을 준비하면서 노션과 엑셀에 흩어져 있던 정보를 매번 다시 정리해야 했던 불편함을 줄이기 위해 만들었습니다.</p>
-          <p>여행별 교통·숙소 일정 관리, 짐싸기 체크리스트, 환전과 여행비 정산, 그룹 일정 공유, Festival World Map과 여행 데이터 일괄등록 기능을 제공합니다.</p>
-          <p>Festival Passport는 실제 페스티벌 여행에서 필요했던 기능을 바탕으로 개인이 제작하고 운영하는 프리뷰 서비스입니다.</p>
+          <p>라이브행은 콘서트와 페스티벌을 보러 떠나는 여행의 일정, 교통, 숙소, 준비물, 비용과 지난 기록을 한곳에서 관리하는 여행 도구입니다.</p>
+          <p>보고 싶은 무대를 찾아 떠날 때 노션과 엑셀에 흩어진 정보를 매번 다시 정리해야 했던 불편함을 줄이기 위해 만들었습니다.</p>
+          <p>여행별 교통·숙소 일정 관리, 짐싸기 체크리스트, 환전과 여행비 정산, 그룹 일정 공유, 라이브맵과 여행 데이터 일괄등록 기능을 제공합니다.</p>
+          <p>라이브행은 실제 공연·페스티벌 여행에서 필요했던 기능을 바탕으로 개인이 제작하고 운영하는 프리뷰 서비스입니다.</p>
         </div>
         <div class="about-actions"><a href="https://blog.naver.com/illuvision/224350319220" target="_blank" rel="noopener noreferrer">제작 이야기 보기</a></div>
       </article>
@@ -553,7 +557,7 @@
         </form>
       </article>
       <article class="card feedback-result" id="feedback-success" hidden aria-live="polite" tabindex="-1"><h2>피드백을 보내주셔서 감사합니다.</h2><p>보내주신 내용은 사이트 개선에 참고하겠습니다.<br>회신이 필요한 경우 입력하신 이메일로 답변드리겠습니다.</p><div class="guide-actions"><button type="button" class="primary-btn" data-go="home">홈으로 돌아가기</button><button type="button" class="secondary-btn" data-guide-open="feedback-success">사용 가이드 보기</button></div></article>
-      <p class="feedback-version">Festival Passport · Beta</p>
+      <p class="feedback-version">라이브행 · Beta</p>
     </section>
 
     <section class="page privacy-page" id="page-privacy">
@@ -586,7 +590,7 @@
       <div class="visitor-stat"><small>누적 방문자</small><b id="total-visitors">–</b></div>
     </div>
     <div class="creator-credit" aria-label="제작자 링크">
-      <a href="#about">Festival Passport by illuvision</a><span class="divider">·</span>
+      <a href="#about">라이브행 by illuvision</a><span class="divider">·</span>
       <a href="#privacy">개인정보처리방침</a><span class="divider">·</span>
       <a href="https://blog.naver.com/illuvision" target="_blank" rel="noopener noreferrer">Blog</a><span class="divider">·</span>
       <a href="https://www.instagram.com/illuvision_/" target="_blank" rel="noopener noreferrer">Instagram @illuvision_</a>
@@ -903,11 +907,11 @@ const GA_EVENT_PARAMETERS=new Set(["trip_id","trip_status","section","feature","
 function analyticsPayload(params={}){const safe={};Object.entries(params).forEach(([key,value])=>{if(!GA_EVENT_PARAMETERS.has(key)||value===undefined||value===null||value==="")return;if(key==="success")safe[key]=Boolean(value);else if(key==="completion_percent")safe[key]=Math.max(0,Math.min(100,Math.round(Number(value)||0)));else safe[key]=String(value).slice(0,key==="festival_name"?100:80)});return safe}
 function analyticsDebug(name,payload){if(window.FESTIVAL_ANALYTICS?.debug)console.info("[GA]",name,payload)}
 function trackEvent(name,params={}){try{const payload=analyticsPayload(params);analyticsDebug(name,payload);if(!window.FESTIVAL_ANALYTICS?.enabled||typeof window.gtag!=="function")return;window.gtag("event",name,payload)}catch(error){console.warn("Analytics event skipped",error)}}
-function trackPageView(pagePath,pageTitle){try{if(!pagePath||lastTrackedPage===pagePath)return false;lastTrackedPage=pagePath;const payload={page_title:pageTitle||"Festival Passport",page_location:`${location.origin}${pagePath}`,page_path:pagePath};analyticsDebug("page_view",payload);if(window.FESTIVAL_ANALYTICS?.enabled&&typeof window.gtag==="function")window.gtag("event","page_view",payload);return true}catch(error){console.warn("Analytics page view skipped",error);return false}}
+function trackPageView(pagePath,pageTitle){try{if(!pagePath||lastTrackedPage===pagePath)return false;lastTrackedPage=pagePath;const payload={page_title:pageTitle||"라이브행",page_location:`${location.origin}${pagePath}`,page_path:pagePath};analyticsDebug("page_view",payload);if(window.FESTIVAL_ANALYTICS?.enabled&&typeof window.gtag==="function")window.gtag("event","page_view",payload);return true}catch(error){console.warn("Analytics page view skipped",error);return false}}
 function analyticsCountBucket(value){const count=Number(value)||0;return count===0?"0":count<=10?"1_10":count<=50?"11_50":count<=100?"51_100":"101_plus"}
 function tripAnalytics(trip,extra={}){return{trip_id:trip?.id,trip_status:trip?.status,country_code:trip?.countryCode,trip_type:trip?.tripType||trip?.theme,travel_year:trip?.travelStart?.slice(0,4),festival_name:trip?.festivalName||trip?.title,...extra}}
 const HOME_LAYOUT_KEY="festival-passport-home-layout-v1",HOME_SECTION_IDS=["nearestTrip","upcomingTrips","quickTools"],HOME_HIDEABLE_IDS=new Set(["upcomingTrips","quickTools"]),HOME_SECTION_LABELS={nearestTrip:"가장 가까운 여행",upcomingTrips:"나머지 예정 여행",quickTools:"빠른 도구"},DEFAULT_HOME_LAYOUT={version:1,order:[...HOME_SECTION_IDS],hidden:[]};
-const HOME_QUICK_TOOLS_KEY="festival-passport-home-quick-tools-v1",HOME_TOOL_IDS=["worldmap","budget","packing","currency"],HOME_TOOL_LABELS={worldmap:"Festival World Map",budget:"여행비 정산",packing:"짐싸기",currency:"환전"},DEFAULT_HOME_QUICK_TOOLS={version:1,order:[...HOME_TOOL_IDS],hidden:[]};
+const HOME_QUICK_TOOLS_KEY="festival-passport-home-quick-tools-v1",HOME_TOOL_IDS=["worldmap","budget","packing","currency"],HOME_TOOL_LABELS={worldmap:"라이브맵",budget:"여행비 정산",packing:"짐싸기",currency:"환전"},DEFAULT_HOME_QUICK_TOOLS={version:1,order:[...HOME_TOOL_IDS],hidden:[]};
 let homeEditMode=false,draggedHomeSection=null;
 function normalizeHomeLayout(value){const source=value&&typeof value==="object"?value:{},order=[],hidden=[];if(Array.isArray(source.order))source.order.forEach(id=>{if(HOME_SECTION_IDS.includes(id)&&!order.includes(id))order.push(id)});HOME_SECTION_IDS.forEach(id=>{if(!order.includes(id))order.push(id)});if(Array.isArray(source.hidden))source.hidden.forEach(id=>{if(HOME_HIDEABLE_IDS.has(id)&&!hidden.includes(id))hidden.push(id)});return{version:1,order,hidden}}
 function homeLayout(){return normalizeHomeLayout(readJSON(HOME_LAYOUT_KEY,DEFAULT_HOME_LAYOUT))}
@@ -1086,7 +1090,7 @@ document.getElementById("close-checklist-template").onclick=()=>document.getElem
 const APP_ICON_PATHS={house:'<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>',map:'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/>',calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="M8 14h3M14 14h2M8 18h3"/>',luggage:'<path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><rect x="5" y="7" width="14" height="14" rx="2"/><path d="M9 11v6M15 11v6M8 21v1M16 21v1"/>',wallet:'<path d="M4 6a2 2 0 0 1 2-2h12v4H6a2 2 0 0 0 0 4h14v8H6a2 2 0 0 1-2-2Z"/><path d="M16 12v4h4M17.5 14h.01"/>',user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>','map-pinned':'<path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 12v9"/><circle cx="15" cy="7.5" r="2.5"/><path d="M15 10c-2 2-3 3.5-3 3.5"/>',receipt:'<path d="M6 3h12v19l-3-2-3 2-3-2-3 2Z"/><path d="M9 8h6M9 12h6M9 16h4"/>'};
 function appIcon(name){return`<svg class="app-icon" viewBox="0 0 24 24" aria-hidden="true">${APP_ICON_PATHS[name]||APP_ICON_PATHS.house}</svg>`}
 function renderTravelToolIcons(){document.querySelectorAll("[data-tool-icon]").forEach(node=>node.innerHTML=appIcon(node.dataset.toolIcon))}
-function renderBottomNav(){const nav=document.getElementById("bottom-nav"),items=[{id:"home",icon:"house",label:"홈"},{id:"trips",icon:"calendar",label:"여행"},{id:"worldmap",icon:"map-pinned",label:"월드맵"},{id:"packing",icon:"luggage",label:"짐싸기"},{id:"mypage",icon:"user",label:"MY"}];nav.innerHTML=items.map(item=>`<button class="nav-btn" data-go="${item.id}">${appIcon(item.icon)}${item.label}</button>`).join("");nav.querySelectorAll("[data-go]").forEach(button=>button.onclick=()=>go(button.dataset.go))}
+function renderBottomNav(){const nav=document.getElementById("bottom-nav"),items=[{id:"home",icon:"house",label:"홈"},{id:"trips",icon:"calendar",label:"여행"},{id:"worldmap",icon:"map-pinned",label:"라이브맵"},{id:"packing",icon:"luggage",label:"짐싸기"},{id:"mypage",icon:"user",label:"MY"}];nav.innerHTML=items.map(item=>`<button class="nav-btn" data-go="${item.id}">${appIcon(item.icon)}${item.label}</button>`).join("");nav.querySelectorAll("[data-go]").forEach(button=>button.onclick=()=>go(button.dataset.go))}
 renderTravelToolIcons();
 function renderMyPage(){const trips=allTrips(),transports=trips.reduce((sum,trip)=>sum+tripTransport(trip.id).length,0),stays=trips.reduce((sum,trip)=>sum+tripStays(trip.id).length,0),packing=trips.reduce((sum,trip)=>{const stats=packingStats(trip.id);return{checked:sum.checked+stats.checked,total:sum.total+stats.total}},{checked:0,total:0}),archiveDestinations=window.FestivalArchive?.allFestivalDestinations?.(),pastCount=Array.isArray(archiveDestinations)?archiveDestinations.filter(item=>item.recordType==="past").length:pastFestivalRecords().length,signedIn=Boolean(cloudUser&&!cloudUser.is_anonymous);document.getElementById("mypage-auth-state").textContent=signedIn?"로그인됨":"로그아웃";document.getElementById("mypage-email").textContent=signedIn?(cloudUser.email||"연결됨"):"–";document.getElementById("mypage-login-method").textContent=signedIn?currentLoginMethodLabel():"–";document.getElementById("mypage-last-login").textContent=signedIn?formatAccountTime(cloudUser?.last_sign_in_at):"기록 없음";document.getElementById("mypage-last-sync").textContent=formatLastSync(readJSON(LAST_SYNC_KEY,null));document.getElementById("mypage-trip-count").textContent=`${trips.length}개`;document.getElementById("mypage-past-count").textContent=`${pastCount}개`;document.getElementById("mypage-transport-count").textContent=`${transports}개`;document.getElementById("mypage-stay-count").textContent=`${stays}개`;document.getElementById("mypage-packing-count").textContent=`${packing.checked} / ${packing.total}개`;document.getElementById("mypage-storage-note").textContent=signedIn?"이 브라우저와 로그인한 기기에 동기화됩니다.":"현재 브라우저에만 저장됩니다. 다른 기기에서도 보려면 로그인해 주세요.";document.getElementById("mypage-sync-now").classList.toggle("hidden",!signedIn);document.getElementById("mypage-account-management").hidden=!signedIn;renderMyGroups()}
 document.getElementById("restore-default-trips").onclick=()=>{if(confirm("후지록과 섬머소닉 도쿄를 여행 목록에 다시 표시할까요?")){const restored=hiddenDefaultTrips();removeStored(HIDDEN_DEFAULT_TRIPS_KEY);restored.forEach(id=>trackEvent("trip_restored",tripAnalytics(TRIP_DEFINITIONS.find(trip=>trip.id===id),{source:"mypage"})));renderPackingTabs();renderDashboard();scheduleCloudSave()}};document.getElementById("mypage-open-sync").onclick=openSyncPanel;document.getElementById("mypage-sync-now").onclick=()=>initialCloudSync(true);document.getElementById("mypage-reset-data").onclick=openResetData;document.getElementById("close-group-manage").onclick=()=>document.getElementById("group-manage-dialog").close();document.getElementById("group-manage-dialog").addEventListener("click",event=>{if(event.target===event.currentTarget)event.currentTarget.close()});renderBottomNav();
@@ -1184,16 +1188,18 @@ function renderGenericStays(){
 function genericBudgetPanel(){const items=tripBudget(currentTrip.id),total=items.reduce((sum,item)=>sum+Number(item.amount||0),0);return`<div class="trip-summary-grid"><article class="card"><span class="sub">등록 항목</span><b>${items.length}개</b></article><article class="card"><span class="sub">예상 합계</span><b>${total.toLocaleString()}원</b></article><article class="card"><span class="sub">여행</span><b style="font-size:15px">${escapeHTML(currentTrip.title)}</b></article></div><article class="card"><h2>여행 예산</h2><form class="trip-form-section" id="trip-budget-form"><label>분류<select name="category"><option>티켓</option><option>교통</option><option>숙소</option><option>식비</option><option>기타</option></select></label><label>항목<input name="title" required maxlength="80"></label><label>금액<input name="amount" type="number" min="0" required></label><label>통화<select name="currency"><option value="KRW">KRW</option><option value="JPY">JPY</option><option value="USD">USD</option></select></label><div class="wide"><button class="primary-btn">저장</button></div></form><div id="trip-budget-list">${items.length?items.map(item=>`<div class="itinerary-item"><h3>${escapeHTML(item.category)} · ${escapeHTML(item.title)}</h3><p>${Number(item.amount).toLocaleString()} ${escapeHTML(item.currency)}</p><button class="secondary-btn" data-delete-trip-budget="${item.id}">삭제</button></div>`).join(""):'<div class="trip-empty">아직 등록한 예산이 없습니다.</div>'}</div></article>`}
 function bindGenericBudget(){document.getElementById("trip-budget-form").onsubmit=event=>{event.preventDefault();const item=Object.fromEntries(new FormData(event.currentTarget).entries());item.id=crypto.randomUUID();writeJSON(tripBudgetKey(currentTrip.id),[...tripBudget(currentTrip.id),item]);trackEvent("budget_item_added",tripAnalytics(currentTrip,{feature:item.category}));renderTripPanel("budget");scheduleCloudSave()};document.querySelectorAll("[data-delete-trip-budget]").forEach(button=>button.onclick=()=>{writeJSON(tripBudgetKey(currentTrip.id),tripBudget(currentTrip.id).filter(item=>item.id!==button.dataset.deleteTripBudget));trackEvent("budget_item_deleted",tripAnalytics(currentTrip,{section:"budget"}));renderTripPanel("budget");scheduleCloudSave()})}
 function renderTripOverview(){const t=currentTrip,query=encodeURIComponent(`${t.location}, ${t.city}, ${t.countryName}`),summary=readinessSummary(t.id),located=tripHasCoordinates(t);return`<div class="trip-summary-grid"><article class="card"><span class="sub">준비도</span><b>${summary.pct}%</b></article><article class="card"><span class="sub">여행 기간</span><b style="font-size:16px">${shortDateRange(t.travelStart,t.travelEnd)}</b></article><article class="card"><span class="sub">상태</span><b style="font-size:16px">${t.status==="booked"?"예약 진행":"계획 중"}</b></article></div><article class="card"><h2>행사 정보</h2><dl class="info-list"><div class="info-row"><dt>페스티벌</dt><dd>${escapeHTML(t.festivalName)}</dd></div><div class="info-row"><dt>행사 일정</dt><dd>${escapeHTML(t.eventStart)} – ${escapeHTML(t.eventEnd)}</dd></div><div class="info-row"><dt>장소</dt><dd>${escapeHTML(t.location)} · ${escapeHTML(t.city)}, ${escapeHTML(t.countryName)}</dd></div></dl></article><article class="card map-card"><h2>행사장 위치</h2><iframe class="map-frame" title="${escapeHTML(t.title)} 행사장 지도" loading="lazy" src="https://www.google.com/maps?q=${query}&amp;output=embed"></iframe><div class="map-actions"><a class="map-link primary" href="https://www.google.com/maps/search/?api=1&amp;query=${query}" target="_blank" rel="noreferrer">Google Maps</a>${t.officialUrl?`<a class="map-link" href="${escapeHTML(t.officialUrl)}" target="_blank" rel="noreferrer">공식 홈페이지</a>`:""}${t.custom&&!located?'<button class="map-link" type="button" id="resolve-trip-location">월드맵 위치 찾기</button>':""}</div>${t.custom&&!located?'<p class="sub">좌표가 없어 월드맵에는 아직 표시되지 않습니다. 위치 찾기를 누르면 장소명으로 한 번 검색해 저장합니다. © OpenStreetMap contributors</p>':""}</article>`}
-function renderTripPanel(tab,updateHistory=true){if(!currentTrip)return;currentTripTab=TRIP_TAB_LABELS[tab]?tab:"overview";document.querySelectorAll("#trip-detail-tabs .tab").forEach(button=>button.classList.toggle("active",button.dataset.tripTab===currentTripTab));const root=document.getElementById("trip-detail-content"),groupCard=["stay","itinerary"].includes(currentTripTab)?genericTransportGroupPanel(currentTrip):"";root.innerHTML="";if(currentTripTab==="overview"){root.innerHTML=renderTripOverview();document.getElementById("resolve-trip-location")?.addEventListener("click",resolveCurrentTripLocation)}else if(currentTripTab==="packing"){root.innerHTML='<div id="trip-packing-list"></div>';renderChecklist(currentTrip.id,document.getElementById("trip-packing-list"))}else if(currentTripTab==="transport"){root.innerHTML=genericEventForm(currentTrip,"transport");bindTripEventForm("transport");bindGroupPanel()}else if(currentTripTab==="itinerary"){root.innerHTML=groupCard+genericEventForm(currentTrip,"itinerary");bindGroupPanel();bindTripEventForm("itinerary")}else if(currentTripTab==="stay"){root.innerHTML=groupCard+genericStayPanel();bindGroupPanel();renderGenericStays()}else if(currentTripTab==="budget"){root.innerHTML=genericBudgetPanel();bindGenericBudget()}const nextHash=`#trip/${encodeURIComponent(currentTrip.id)}/${currentTripTab}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:"trip",tripId:currentTrip.id,tab:currentTripTab},"",nextHash);if(trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${currentTripTab}`))trackEvent("trip_section_view",tripAnalytics(currentTrip,{section:currentTripTab}))}
+function renderTripPanel(tab,updateHistory=true){if(!currentTrip)return;currentTripTab=TRIP_TAB_LABELS[tab]?tab:"overview";document.querySelectorAll("#trip-detail-tabs .tab").forEach(button=>button.classList.toggle("active",button.dataset.tripTab===currentTripTab));const root=document.getElementById("trip-detail-content"),groupCard=["stay","itinerary"].includes(currentTripTab)?genericTransportGroupPanel(currentTrip):"";root.innerHTML="";if(currentTripTab==="overview"){root.innerHTML=renderTripOverview();document.getElementById("resolve-trip-location")?.addEventListener("click",resolveCurrentTripLocation)}else if(currentTripTab==="packing"){root.innerHTML='<div id="trip-packing-list"></div>';renderChecklist(currentTrip.id,document.getElementById("trip-packing-list"))}else if(currentTripTab==="transport"){root.innerHTML=genericEventForm(currentTrip,"transport");bindTripEventForm("transport");bindGroupPanel()}else if(currentTripTab==="itinerary"){root.innerHTML=groupCard+genericEventForm(currentTrip,"itinerary");bindGroupPanel();bindTripEventForm("itinerary")}else if(currentTripTab==="stay"){root.innerHTML=groupCard+genericStayPanel();bindGroupPanel();renderGenericStays()}else if(currentTripTab==="budget"){root.innerHTML=genericBudgetPanel();bindGenericBudget()}const nextHash=`#trip/${encodeURIComponent(currentTrip.id)}/${currentTripTab}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:"trip",tripId:currentTrip.id,tab:currentTripTab},"",nextHash);if(trackPageView(`${location.pathname}${nextHash}`,`라이브행 · ${currentTripTab}`))trackEvent("trip_section_view",tripAnalytics(currentTrip,{section:currentTripTab}))}
 function openTripDetail(ref,tab="overview",updateHistory=true,source="trip_list"){const trip=findTrip(ref);if(!trip)return go("home",updateHistory);currentTrip=trip;currentTripTab=TRIP_TAB_LABELS[tab]&&trip.enabledFeatures[tab]!==false?tab:"overview";writeJSON(CURRENT_TRIP_KEY,trip.id);document.getElementById("trip-detail-head").innerHTML=`<div class="festival-head ${trip.theme||"fuji"} trip-detail-head"><div class="eyebrow">${escapeHTML(trip.countryName)} · ${escapeHTML(trip.city)}</div><h1>${escapeHTML(trip.title)}</h1><div class="chips"><span class="chip">${shortDateRange(trip.eventStart,trip.eventEnd)}</span><span class="chip">${escapeHTML(trip.location)}</span><span class="chip">${ddayLabel(trip.eventStart)}</span></div><div class="trip-head-actions"><span>Travel ${shortDateRange(trip.travelStart,trip.travelEnd)}</span><button type="button" data-go-trip-home>전체 여행</button></div></div>`;const tabs=Object.keys(TRIP_TAB_LABELS).filter(key=>trip.enabledFeatures[key]!==false);document.getElementById("trip-detail-tabs").innerHTML=tabs.map(key=>`<button class="tab" data-trip-tab="${key}">${TRIP_TAB_LABELS[key]}</button>`).join("");document.querySelectorAll("[data-trip-tab]").forEach(button=>button.onclick=()=>renderTripPanel(button.dataset.tripTab));document.querySelector("[data-go-trip-home]").onclick=()=>go("trips");showPage("trip");renderTripPanel(currentTripTab,updateHistory);if(cloudUser&&!cloudUser.is_anonymous)activateGroupForTrip(trip.id).catch(error=>console.error("[Festival Passport] trip group activation failed",error));trackEvent("trip_open",tripAnalytics(trip,{source}))}
 
 let festivalWorldMap=null;function renderWorldMap(){const trips=allTrips(),list=document.getElementById("world-map-list"),status=document.getElementById("world-map-status"),located=trips.filter(tripHasCoordinates);document.getElementById("world-map-count").textContent=`${trips.length}개 여행 · ${new Set(trips.map(trip=>trip.countryCode)).size}개 국가`;list.innerHTML=trips.length?trips.map(trip=>{const hasCoordinates=located.includes(trip);return`<button class="world-trip" data-world-trip="${trip.id}"><span class="world-icon">${trip.icon||"🎪"}</span><span><b>${escapeHTML(trip.title)}</b><small>${escapeHTML(trip.city)} · ${escapeHTML(trip.countryName)} · ${shortDateRange(trip.eventStart,trip.eventEnd)}</small></span><span class="map-state">${hasCoordinates?"지도 표시":"도시만 등록"}</span></button>`}).join(""):'<article class="card empty">등록된 여행이 없습니다.<br><small>여행을 추가하면 이곳에 국가와 도시가 표시됩니다.</small></article>';list.querySelectorAll("[data-world-trip]").forEach(button=>button.onclick=()=>openTripDetail(button.dataset.worldTrip));if(typeof L==="undefined"){status.textContent="지도를 불러오지 못했습니다. 아래 여행 목록은 정상적으로 사용할 수 있습니다.";return}if(festivalWorldMap){festivalWorldMap.remove();festivalWorldMap=null}festivalWorldMap=L.map("festival-world-map",{worldCopyJump:true,scrollWheelZoom:true,dragging:true,touchZoom:true,doubleClickZoom:true,keyboard:true}).setView([25,20],2);L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(festivalWorldMap);const bounds=[];located.forEach(trip=>{const point=[Number(trip.latitude),Number(trip.longitude)];bounds.push(point);const marker=L.marker(point).addTo(festivalWorldMap);marker.bindPopup(`<b>${escapeHTML(trip.title)}</b><br>${escapeHTML(trip.city)}, ${escapeHTML(trip.countryName)}<br><button type="button" data-map-popup-trip="${trip.id}" style="margin-top:8px">여행 상세 보기</button>`);marker.on("popupopen",()=>document.querySelector(`[data-map-popup-trip="${trip.id}"]`)?.addEventListener("click",()=>openTripDetail(trip.id),{once:true}))});if(bounds.length===1)festivalWorldMap.setView(bounds[0],6);else if(bounds.length>1)festivalWorldMap.fitBounds(bounds,{padding:[35,35],maxZoom:6});status.textContent=located.length===trips.length?"모든 여행의 행사장 위치를 표시했습니다.":`${located.length}개 여행은 지도에 표시했고, 좌표가 없는 여행은 아래 목록에 표시했습니다.`;setTimeout(()=>festivalWorldMap?.invalidateSize(),80);trackEvent("world_map_view",{section:"worldmap"})}
 
 function go(page,updateHistory=true){
  if(["fuji","sonic"].includes(page))return openTripDetail(page,"overview",updateHistory);
- restoreLegacyTripPanels();if(page==="mypage")renderMyPage();if(page==="budget")renderBudget();if(page==="trips"){renderTripLibrary();renderKrFestivalTemplates();renderRecommendedConcerts();renderKrFestivalTbd()}showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();renderKrFestivalPast();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}if(page==="guide")trackEvent("guide_view",{section:"guide"});if(page==="feedback")prepareFeedbackPage();const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`Festival Passport · ${page}`);
+ restoreLegacyTripPanels();if(page==="mypage")renderMyPage();if(page==="budget")renderBudget();if(page==="trips"){renderTripLibrary();renderKrFestivalTemplates();renderRecommendedConcerts();renderKrFestivalTbd()}showPage(page);if(page==="worldmap"){(window.FestivalArchive?.renderWorldMap||renderWorldMap)();renderKrFestivalPast();trackEvent("world_map_view",{view:"map",source:"navigation",count_bucket:analyticsCountBucket(allTrips().length)})}if(page==="guide")trackEvent("guide_view",{section:"guide"});if(page==="feedback")prepareFeedbackPage();const nextHash=`#${page}`;if(updateHistory&&location.hash!==nextHash)history.pushState({route:page},"",nextHash);trackPageView(`${location.pathname}${nextHash}`,`라이브행 · ${page}`);
 }
 document.querySelectorAll("[data-go]:not(.nav-btn)").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
+document.querySelector("[data-livehaeng-discover]")?.addEventListener("click",()=>{go("trips");requestAnimationFrame(()=>document.getElementById("kr-festival-templates")?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"}))});
+document.querySelector("[data-livehaeng-trips]")?.addEventListener("click",()=>{go("trips");requestAnimationFrame(()=>document.getElementById("trip-library")?.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"}))});
 async function joinFromInviteLink(code){if(!code)return go("home",false);try{await requireGroupAccount();const{data,error}=await cloudClient.rpc("join_travel_group",{p_code:code});if(error)throw error;activeGroupId=typeof data==="string"?data:data?.group_id;rememberActiveGroup();await loadActiveGroup();toastMessage("여행 그룹에 참여했어요.");openTripDetail(activeGroupTripId,"overview",true,"invite_link")}catch(error){if(String(error?.message||"").includes("group_login")){writeJSON(AUTH_RETURN_KEY,`#invite/${code}`);go("mypage",false);openSyncPanel();toastMessage("로그인 후 초대받은 그룹에 참여할 수 있어요.")}else{console.error("[Festival Passport] invite link failed",error);go("trips",false);toastMessage("초대 링크를 확인해 주세요.")}}}
 function routeHash(){const route=decodeURIComponent(location.hash.replace(/^#/,""));if(route.startsWith("invite/"))return joinFromInviteLink(route.slice(7));if(route.startsWith("trip/")){const [,id,tab="overview"]=route.split("/");return openTripDetail(id,tab,false,"history")}if(["fuji","sonic"].includes(route))return findTrip(route)?openTripDetail(route,"overview",false,"legacy_route"):go("trips",false);if(["home","trips","packing","currency","worldmap","budget","mypage","guide","feedback","about","privacy"].includes(route))go(route,false);else go("home",false)}
 window.addEventListener("popstate",routeHash);
